@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wedding Decoration Plan — Sharveen</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@300;400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --crimson:     #A50C1C;
+      --scarlet:     #D21423;
+      --silver:      #C6BBB7;
+      --ivory:       #FAF7F2;
+      --cream:       #F2EBE0;
+      --gold:        #C8A96E;
+      --deep-green:  #4A5E4A;
+      --charcoal:    #2E2E2E;
+      --light-grey:  #E8E4DF;
+    }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--ivory);
+      color: var(--charcoal);
+      font-weight: 300;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: var(--charcoal);
+      color: var(--ivory);
+      text-align: center;
+      padding: 70px 24px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at center, rgba(165,12,28,0.18) 0%, transparent 70%);
+    }
+    .hero-tag {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 300;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+    .hero h1 em { font-style: italic; color: var(--silver); }
+    .hero p {
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: var(--silver);
+      text-transform: uppercase;
+    }
+
+    /* ── SECTIONS ── */
+    section { padding: 64px 5vw; }
+    section + section { border-top: 1px solid var(--light-grey); }
+
+    .section-tag {
+      font-size: 10px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 400;
+      margin-bottom: 32px;
+      line-height: 1.2;
+    }
+    p { line-height: 1.8; font-size: 14px; color: #555; }
+
+    /* ── COLOR PALETTE ── */
+    .palette-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .swatch-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .swatch-name {
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-align: center;
+      color: #666;
+      text-transform: uppercase;
+    }
+    .swatch-hex {
+      font-size: 10px;
+      color: #999;
+      font-family: monospace;
+    }
+
+    /* ── TEMPLE LAYOUT ── */
+    .temple-wrap {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .temple-svg-wrap {
+      flex: 1;
+      min-width: 300px;
+      max-width: 540px;
+    }
+    .temple-legend {
+      flex: 1;
+      min-width: 240px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .legend-text h4 {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+    .legend-text p {
+      font-size: 12px;
+    }
+
+    /* ── ZONES GRID ── */
+    .zones-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 28px;
+    }
+    .zone-card {
+      background: white;
+      border: 1px solid var(--light-grey);
+      border-radius: 2px;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+    .zone-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.07); }
+    .zone-header {
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid var(--light-grey);
+    }
+    .zone-number {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .zone-header h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 400;
+    }
+    .zone-body { padding: 20px 22px; }
+    .zone-body ul {
+      list-style: none;
+      padding: 0;
+    }
+    .zone-body ul li {
+      font-size: 13px;
+      color: #555;
+      padding: 6px 0;
+      border-bottom: 1px solid #f0ece7;
+      display: flex;
+      gap: 10px;
+      line-height: 1.5;
+    }
+    .zone-body ul li::before {
+      content: '—';
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+    .zone-body ul li:last-child { border-bottom: none; }
+    .zone-flowers {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+    }
+    .flower-tag {
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid;
+    }
+
+    /* ── PRINCIPLES ── */
+    .principles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 24px;
+    }
+    .principle {
+      padding: 28px 24px;
+      background: white;
+      border: 1px solid var(--light-grey);
+      border-top: 3px solid var(--crimson);
+    }
+    .principle-icon { font-size: 24px; margin-bottom: 14px; }
+    .principle h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 400;
+      margin-bottom: 10px;
+    }
+    .principle p { font-size: 13px; }
+
+    /* ── DO / DON'T ── */
+    .do-dont {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 600px) { .do-dont { grid-template-columns: 1fr; } }
+    .do-box, .dont-box {
+      padding: 28px;
+      border-radius: 2px;
+    }
+    .do-box { background: #f0faf3; border: 1px solid #b8dfc4; }
+    .dont-box { background: #fdf0f0; border: 1px solid #e8b8b8; }
+    .do-box h4 { color: #2d6a3f; margin-bottom: 14px; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
+    .dont-box h4 { color: #8a2020; margin-bottom: 14px; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; }
+    .do-box ul, .dont-box ul { list-style: none; }
+    .do-box ul li, .dont-box ul li { font-size: 13px; color: #555; padding: 5px 0; display: flex; gap: 8px; }
+    .do-box ul li::before { content: '✓'; color: #2d6a3f; font-weight: 600; }
+    .dont-box ul li::before { content: '✗'; color: #8a2020; font-weight: 600; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--charcoal);
+      color: var(--silver);
+      text-align: center;
+      padding: 40px 24px;
+      font-size: 12px;
+      letter-spacing: 2px;
+    }
+    footer em {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 18px;
+      display: block;
+      color: var(--ivory);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<div class="hero">
+  <div class="hero-tag">Wedding Decoration Vision</div>
+  <h1>Serene <em>&amp;</em> Sacred</h1>
+  <p>A minimalist Hindu temple setting — crimson, silver &amp; ivory</p>
+</div>
+
+<!-- ══ COLOUR PALETTE ══ -->
+<section>
+  <div class="section-tag">Step 01</div>
+  <h2>Colour Palette</h2>
+  <p style="margin-bottom:32px; max-width:600px;">
+    Built directly from the bride's saree — deep crimson and silver — softened with ivory, champagne gold (echoing the temple's brass), and a whisper of sage green for freshness.
+  </p>
+  <div class="palette-grid">
+    <div class="swatch">
+      <div class="swatch-circle" style="background:#A50C1C;"></div>
+      <div class="swatch-name">Deep Crimson</div>
+      <div class="swatch-hex">#A50C1C — Primary</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-circle" style="background:#D21423;"></div>
+      <div class="swatch-name">Bright Scarlet</div>
+      <div class="swatch-hex">#D21423 — Accent</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-circle" style="background:#C6BBB7; border:1px solid #ddd;"></div>
+      <div class="swatch-name">Silver Mist</div>
+      <div class="swatch-hex">#C6BBB7 — Saree Zari</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-circle" style="background:#FAF7F2; border:1px solid #e0dbd3;"></div>
+      <div class="swatch-name">Ivory White</div>
+      <div class="swatch-hex">#FAF7F2 — Base</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-circle" style="background:#C8A96E;"></div>
+      <div class="swatch-name">Champagne Gold</div>
+      <div class="swatch-hex">#C8A96E — Brass echo</div>
+    </div>
+    <div class="swatch">
+      <div class="swatch-circle" style="background:#7A9E7E;"></div>
+      <div class="swatch-name">Sage Green</div>
+      <div class="swatch-hex">#7A9E7E — Foliage</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TEMPLE LAYOUT ══ -->
+<section style="background: var(--cream);">
+  <div class="section-tag">Step 02</div>
+  <h2>Temple Layout — Bird's Eye View</h2>
+  <div class="temple-wrap">
+
+    <div class="temple-svg-wrap">
+      <svg viewBox="0 0 520 680" xmlns="http://www.w3.org/2000/svg" style="width:100%; border:1px solid #ddd; background:#fff;">
+
+        <!-- Outer boundary -->
+        <rect x="10" y="10" width="500" height="660" rx="4" fill="#faf7f2" stroke="#ccc" stroke-width="1.5"/>
+
+        <!-- Title -->
+        <text x="260" y="38" text-anchor="middle" font-family="serif" font-size="14" fill="#555" font-style="italic">Temple Floor Plan (Schematic)</text>
+
+        <!-- Entrance columns (4 pairs) -->
+        <!-- Left columns -->
+        <rect x="30" y="550" width="28" height="80" rx="3" fill="#d4b896" stroke="#b8936a" stroke-width="1"/>
+        <rect x="30" y="440" width="28" height="80" rx="3" fill="#d4b896" stroke="#b8936a" stroke-width="1"/>
+        <rect x="30" y="330" width="28" height="80" rx="3" fill="#d4b896" stroke="#b8936a" stroke-width="1"/>
+        <rect x="30" y="220" width="28" height="80" rx="3" fill="#d4b896" stroke="#b8936a" stroke-width="1"/>
+
+        <!-- Right columns -->
+        <rect x="462" y="550" width="28" height="80" rx="3" fill="#d4b896" stroke="#b8936a" stroke-width="1"/>
+        <rect x="462" y="440" width="28" height="80" rx="3" fill="#d4b896" stroke="#b8936a" stroke-width="1"/>
+        <rect x="462" y="330" width="28" height="80" rx="3" fill="#d4b896" stroke="#b8936a" stroke-width="1"/>
+        <rect x="462" y="220" width="28" height="80" rx="3" fill="#d4b896" stroke="#b8936a" stroke-width="1"/>
+
+        <!-- Walkway (aisle) -->
+        <rect x="195" y="175" width="130" height="400" fill="#f5f0e8" stroke="#e0d8cc" stroke-width="1" stroke-dasharray="4,4"/>
+        <text x="260" y="395" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#aaa" letter-spacing="2">AISLE</text>
+
+        <!-- Ceiling lattice indication -->
+        <rect x="58" y="175" width="404" height="400" fill="none" stroke="#d4b896" stroke-width="0.5" stroke-dasharray="8,6"/>
+
+        <!-- Entrance arch -->
+        <path d="M195 585 Q260 545 325 585" fill="none" stroke="#b8936a" stroke-width="2"/>
+        <line x1="195" y1="585" x2="195" y2="615" stroke="#b8936a" stroke-width="1.5"/>
+        <line x1="325" y1="585" x2="325" y2="615" stroke="#b8936a" stroke-width="1.5"/>
+        <text x="260" y="638" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#888">ENTRANCE</text>
+
+        <!-- Welcome board area -->
+        <rect x="140" y="598" width="48" height="28" rx="2" fill="none" stroke="#C8A96E" stroke-width="1.5"/>
+        <text x="164" y="616" text-anchor="middle" font-family="sans-serif" font-size="8" fill="#C8A96E">Welcome</text>
+
+        <!-- Hanging garland indicators along aisle ceiling -->
+        <!-- Row 1 -->
+        <circle cx="220" cy="230" r="3" fill="#A50C1C" opacity="0.7"/>
+        <circle cx="260" cy="220" r="3" fill="#fff" stroke="#ccc" stroke-width="1"/>
+        <circle cx="300" cy="230" r="3" fill="#A50C1C" opacity="0.7"/>
+        <!-- Row 2 -->
+        <circle cx="220" cy="320" r="3" fill="#A50C1C" opacity="0.7"/>
+        <circle cx="260" cy="310" r="3" fill="#fff" stroke="#ccc" stroke-width="1"/>
+        <circle cx="300" cy="320" r="3" fill="#A50C1C" opacity="0.7"/>
+        <!-- Row 3 -->
+        <circle cx="220" cy="410" r="3" fill="#A50C1C" opacity="0.7"/>
+        <circle cx="260" cy="400" r="3" fill="#fff" stroke="#ccc" stroke-width="1"/>
+        <circle cx="300" cy="410" r="3" fill="#A50C1C" opacity="0.7"/>
+        <!-- Row 4 -->
+        <circle cx="220" cy="500" r="3" fill="#A50C1C" opacity="0.7"/>
+        <circle cx="260" cy="490" r="3" fill="#fff" stroke="#ccc" stroke-width="1"/>
+        <circle cx="300" cy="500" r="3" fill="#A50C1C" opacity="0.7"/>
+
+        <!-- Garland lines -->
+        <line x1="220" y1="205" x2="220" y2="520" stroke="#A50C1C" stroke-width="0.8" opacity="0.4"/>
+        <line x1="260" y1="205" x2="260" y2="520" stroke="#eee" stroke-width="0.8" opacity="0.6"/>
+        <line x1="300" y1="205" x2="300" y2="520" stroke="#A50C1C" stroke-width="0.8" opacity="0.4"/>
+
+        <!-- Mandap platform -->
+        <rect x="145" y="105" width="230" height="115" rx="4" fill="#f0e8d8" stroke="#C8A96E" stroke-width="2"/>
+        <text x="260" y="148" text-anchor="middle" font-family="serif" font-size="12" fill="#8a6a30" font-style="italic">Mandap / Homa Area</text>
+
+        <!-- Om backdrop -->
+        <rect x="170" y="60" width="180" height="55" rx="3" fill="#5a2020" stroke="#3d1010" stroke-width="1.5"/>
+        <text x="260" y="95" text-anchor="middle" font-family="serif" font-size="22" fill="white" opacity="0.9">ॐ</text>
+
+        <!-- Diya ring -->
+        <circle cx="260" cy="155" r="28" fill="none" stroke="#C8A96E" stroke-width="1" stroke-dasharray="3,3"/>
+        <circle cx="260" cy="127" r="3" fill="#C8A96E"/>
+        <circle cx="283" cy="141" r="3" fill="#C8A96E"/>
+        <circle cx="283" cy="169" r="3" fill="#C8A96E"/>
+        <circle cx="260" cy="183" r="3" fill="#C8A96E"/>
+        <circle cx="237" cy="169" r="3" fill="#C8A96E"/>
+        <circle cx="237" cy="141" r="3" fill="#C8A96E"/>
+
+        <!-- Brass bell dots on ceiling -->
+        <g opacity="0.5">
+          <circle cx="80" cy="195" r="4" fill="#C8A96E"/>
+          <circle cx="120" cy="195" r="4" fill="#C8A96E"/>
+          <circle cx="160" cy="195" r="4" fill="#C8A96E"/>
+          <circle cx="360" cy="195" r="4" fill="#C8A96E"/>
+          <circle cx="400" cy="195" r="4" fill="#C8A96E"/>
+          <circle cx="440" cy="195" r="4" fill="#C8A96E"/>
+
+          <circle cx="80" cy="235" r="4" fill="#C8A96E"/>
+          <circle cx="120" cy="235" r="4" fill="#C8A96E"/>
+          <circle cx="160" cy="235" r="4" fill="#C8A96E"/>
+          <circle cx="360" cy="235" r="4" fill="#C8A96E"/>
+          <circle cx="400" cy="235" r="4" fill="#C8A96E"/>
+          <circle cx="440" cy="235" r="4" fill="#C8A96E"/>
+        </g>
+
+        <!-- Side windows -->
+        <rect x="75" y="340" width="50" height="80" rx="2" fill="#e8f4f8" stroke="#b0d0e0" stroke-width="1"/>
+        <line x1="100" y1="340" x2="100" y2="420" stroke="#b0d0e0" stroke-width="0.8"/>
+        <line x1="75" y1="380" x2="125" y2="380" stroke="#b0d0e0" stroke-width="0.8"/>
+
+        <rect x="395" y="340" width="50" height="80" rx="2" fill="#e8f4f8" stroke="#b0d0e0" stroke-width="1"/>
+        <line x1="420" y1="340" x2="420" y2="420" stroke="#b0d0e0" stroke-width="0.8"/>
+        <line x1="395" y1="380" x2="445" y2="380" stroke="#b0d0e0" stroke-width="0.8"/>
+
+        <!-- Legend at bottom -->
+        <g transform="translate(20, 655)">
+          <circle cx="8" cy="8" r="5" fill="#A50C1C" opacity="0.8"/>
+          <text x="18" y="12" font-family="sans-serif" font-size="8" fill="#666">Red rose garlands</text>
+          <circle cx="108" cy="8" r="5" fill="#C8A96E"/>
+          <text x="118" y="12" font-family="sans-serif" font-size="8" fill="#666">Brass/Gold elements</text>
+          <circle cx="220" cy="8" r="5" fill="#d4b896"/>
+          <text x="230" y="12" font-family="sans-serif" font-size="8" fill="#666">Stone columns</text>
+          <circle cx="320" cy="8" r="5" fill="#5a2020"/>
+          <text x="330" y="12" font-family="sans-serif" font-size="8" fill="#666">Om backdrop</text>
+        </g>
+
+      </svg>
+    </div>
+
+    <div class="temple-legend">
+      <p style="margin-bottom:24px;">Based on your temple images, here are the key structural zones and their existing features:</p>
+
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#5a2020;"></div>
+        <div class="legend-text">
+          <h4>Om Backdrop (Focal Point)</h4>
+          <p>Dark reddish-brown panel with the Om symbol — the spiritual centrepiece. Needs only minimal framing, not covering.</p>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#C8A96E;"></div>
+        <div class="legend-text">
+          <h4>Brass Bells &amp; Lattice Ceiling</h4>
+          <p>Geometric carved ceiling with hanging brass bells. Existing decor — complement, don't compete.</p>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#C8A96E; opacity:0.5;"></div>
+        <div class="legend-text">
+          <h4>Mandap / Homa Platform</h4>
+          <p>The raised ritual platform with brass diya ring. Keep this zone sacred and uncluttered.</p>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#d4b896;"></div>
+        <div class="legend-text">
+          <h4>Stone Columns (8 total)</h4>
+          <p>Ornate carved stone pillars — perfect for vertical floral wrapping or garland draping.</p>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#f5f0e8;"></div>
+        <div class="legend-text">
+          <h4>Central Aisle</h4>
+          <p>White walkway leading from entrance to mandap — the procession path. Key visual corridor.</p>
+        </div>
+      </div>
+
+      <div class="legend-item">
+        <div class="legend-dot" style="background:#A50C1C;"></div>
+        <div class="legend-text">
+          <h4>Entrance / Welcome Zone</h4>
+          <p>First impression area. Flanked by columns. Sets the colour story before guests enter.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ ZONE-BY-ZONE DECO PLAN ══ -->
+<section>
+  <div class="section-tag">Step 03</div>
+  <h2>Zone-by-Zone Decoration Plan</h2>
+  <p style="max-width:640px; margin-bottom:36px;">
+    Inspired by your deco samples, adapted to the temple's sacred character. Each zone is designed to feel intentional — never busy.
+  </p>
+
+  <div class="zones-grid">
+
+    <!-- Zone 1 -->
+    <div class="zone-card">
+      <div class="zone-header" style="border-left: 4px solid #A50C1C;">
+        <div class="zone-number">Zone 01</div>
+        <h3>Welcome Area</h3>
+      </div>
+      <div class="zone-body">
+        <ul>
+          <li>Wooden easel with a calligraphy welcome sign on ivory card stock — names in gold script</li>
+          <li>2 brass urns (low, wide) on a marble slab, filled with deep red roses &amp; trailing greenery</li>
+          <li>4 brass conical pillars (as in your sample) flanking the sign</li>
+          <li>Rose petals in a loose crescent on the floor</li>
+        </ul>
+        <div class="zone-flowers">
+          <span class="flower-tag" style="color:#A50C1C; border-color:#A50C1C;">Deep Red Roses</span>
+          <span class="flower-tag" style="color:#7A9E7E; border-color:#7A9E7E;">Eucalyptus</span>
+          <span class="flower-tag" style="color:#C8A96E; border-color:#C8A96E;">Brass Vessels</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone 2 -->
+    <div class="zone-card">
+      <div class="zone-header" style="border-left: 4px solid #C8A96E;">
+        <div class="zone-number">Zone 02</div>
+        <h3>Aisle Walkway</h3>
+      </div>
+      <div class="zone-body">
+        <ul>
+          <li>White jasmine garlands hanging vertically from the lattice ceiling — 3 strands, each tipped with a red rose cluster</li>
+          <li>Thin ivory organza runners laid along the aisle edges</li>
+          <li>Brass diyas placed every 1.5m along the aisle floor (both sides)</li>
+          <li>No standing flower arrangements — keep it open and processional</li>
+        </ul>
+        <div class="zone-flowers">
+          <span class="flower-tag" style="color:#555; border-color:#ddd;">White Jasmine</span>
+          <span class="flower-tag" style="color:#A50C1C; border-color:#A50C1C;">Red Rose Tips</span>
+          <span class="flower-tag" style="color:#C8A96E; border-color:#C8A96E;">Brass Diyas</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone 3 -->
+    <div class="zone-card">
+      <div class="zone-header" style="border-left: 4px solid #7A9E7E;">
+        <div class="zone-number">Zone 03</div>
+        <h3>Stone Columns</h3>
+      </div>
+      <div class="zone-body">
+        <ul>
+          <li>Lower half of each column wrapped in a single jasmine garland strand — simple spiral wrap</li>
+          <li>At capital (top) of each column: one tight red rose cluster, no ribbon</li>
+          <li>No full draping — let the carved stone texture breathe</li>
+          <li>Symmetry is key: all 8 columns treated identically</li>
+        </ul>
+        <div class="zone-flowers">
+          <span class="flower-tag" style="color:#555; border-color:#ddd;">White Jasmine</span>
+          <span class="flower-tag" style="color:#A50C1C; border-color:#A50C1C;">Red Rose Cluster</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone 4 -->
+    <div class="zone-card">
+      <div class="zone-header" style="border-left: 4px solid #5a2020;">
+        <div class="zone-number">Zone 04</div>
+        <h3>Mandap &amp; Om Backdrop</h3>
+      </div>
+      <div class="zone-body">
+        <ul>
+          <li>Do NOT decorate the Om panel itself — let it remain the focal point</li>
+          <li>Frame the backdrop with a simple arch of white button chrysanthemums and sage leaves — thin, airy, not dense</li>
+          <li>Two tall brass floor lamps (standing) on either side of the backdrop</li>
+          <li>Existing diya ring on the platform — supplement with marigold petals scattered around the base</li>
+          <li>Optional: a low, thin jasmine garland as a border around the platform edge</li>
+        </ul>
+        <div class="zone-flowers">
+          <span class="flower-tag" style="color:#fff; background:#5a2020; border-color:#5a2020;">Om — untouched</span>
+          <span class="flower-tag" style="color:#555; border-color:#ddd;">White Chrysanthemum</span>
+          <span class="flower-tag" style="color:#7A9E7E; border-color:#7A9E7E;">Sage Leaves</span>
+          <span class="flower-tag" style="color:#C8A96E; border-color:#C8A96E;">Brass Floor Lamps</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone 5 -->
+    <div class="zone-card">
+      <div class="zone-header" style="border-left: 4px solid #C6BBB7;">
+        <div class="zone-number">Zone 05</div>
+        <h3>Seating Flanks</h3>
+      </div>
+      <div class="zone-body">
+        <ul>
+          <li>Ivory chair sashes (simple knot, no bow) on aisle-side chairs</li>
+          <li>End-of-row markers: one small brass vase with 3 red roses + eucalyptus per aisle seat</li>
+          <li>No floral table centrepieces — the mandap is the centrepiece</li>
+        </ul>
+        <div class="zone-flowers">
+          <span class="flower-tag" style="color:#C6BBB7; border-color:#C6BBB7;">Ivory Sashes</span>
+          <span class="flower-tag" style="color:#A50C1C; border-color:#A50C1C;">Red Roses</span>
+          <span class="flower-tag" style="color:#C8A96E; border-color:#C8A96E;">Mini Brass Vases</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone 6 -->
+    <div class="zone-card">
+      <div class="zone-header" style="border-left: 4px solid #7A9E7E;">
+        <div class="zone-number">Zone 06</div>
+        <h3>Ambient Lighting</h3>
+      </div>
+      <div class="zone-body">
+        <ul>
+          <li>Warm white fairy lights woven through the ceiling lattice — not coloured</li>
+          <li>The brass bells should remain visible; no lighting behind them</li>
+          <li>Candles in glass hurricanes along the window sills</li>
+          <li>No uplighting or coloured gels — the crimson tones come from florals, not light</li>
+        </ul>
+        <div class="zone-flowers">
+          <span class="flower-tag" style="color:#C8A96E; border-color:#C8A96E;">Warm White Fairy Lights</span>
+          <span class="flower-tag" style="color:#555; border-color:#ddd;">Glass Hurricanes</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══ DESIGN PRINCIPLES ══ -->
+<section style="background: var(--cream);">
+  <div class="section-tag">Step 04</div>
+  <h2>Design Principles</h2>
+  <div class="principles-grid">
+    <div class="principle">
+      <div class="principle-icon">◯</div>
+      <h4>Sacred First</h4>
+      <p>The temple's existing elements — Om, brass bells, diya ring — are the decor. Everything added must defer to them.</p>
+    </div>
+    <div class="principle">
+      <div class="principle-icon">—</div>
+      <h4>Restraint</h4>
+      <p>One flower type per zone. Maximum three colours in any single view. Negative space is intentional.</p>
+    </div>
+    <div class="principle">
+      <div class="principle-icon">◆</div>
+      <h4>Saree Echo</h4>
+      <p>Deep red florals mirror the bride's crimson. Silver-white jasmine mirrors the zari embroidery. The bride is the palette.</p>
+    </div>
+    <div class="principle">
+      <div class="principle-icon">↑</div>
+      <h4>Vertical, Not Horizontal</h4>
+      <p>Hang garlands from above. Avoid low table arrangements that block sightlines to the mandap.</p>
+    </div>
+    <div class="principle">
+      <div class="principle-icon">✦</div>
+      <h4>Natural Materials Only</h4>
+      <p>Real flowers, real brass, real stone. No artificial flowers, no plastic, no synthetic ribbons.</p>
+    </div>
+    <div class="principle">
+      <div class="principle-icon">○</div>
+      <h4>Scent Awareness</h4>
+      <p>Jasmine is fragrant. Use it in the aisle and columns. Keep the mandap zone scent-neutral so incense remains distinct.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ DO / DON'T ══ -->
+<section>
+  <div class="section-tag">Step 05</div>
+  <h2>Do's &amp; Don'ts</h2>
+  <div class="do-dont">
+    <div class="do-box">
+      <h4>Do</h4>
+      <ul>
+        <li>Use deep red roses and white jasmine as the hero florals</li>
+        <li>Let the Om backdrop be visible from every seat</li>
+        <li>Work with the existing brass and stone tones</li>
+        <li>Keep the aisle completely clear of obstacles</li>
+        <li>Use warm (not cool) lighting temperature throughout</li>
+        <li>Add fresh marigold petals on the ritual platform floor</li>
+        <li>Keep the ivory base colour consistent throughout all zones</li>
+      </ul>
+    </div>
+    <div class="dont-box">
+      <h4>Don't</h4>
+      <ul>
+        <li>Add pink or orange tones — they clash with the bride's crimson</li>
+        <li>Drape fabric over the Om panel or obscure it</li>
+        <li>Use artificial flowers anywhere visible</li>
+        <li>Hang dense floral walls — they compete with the carved stone</li>
+        <li>Use coloured light gels (blue, purple) — they alter the crimson florals</li>
+        <li>Over-decorate the mandap platform — it must stay ritually functional</li>
+        <li>Mix gold and silver metal finishes — stick to brass/champagne gold only</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FLOWER SHOPPING LIST ══ -->
+<section style="background: var(--cream);">
+  <div class="section-tag">Step 06</div>
+  <h2>Flower &amp; Material Reference</h2>
+  <p style="max-width:620px; margin-bottom:28px;">A simple list to brief your florist. Quantities to be confirmed based on venue measurements.</p>
+
+  <table style="width:100%; border-collapse:collapse; font-size:13px;">
+    <thead>
+      <tr style="background: var(--charcoal); color: var(--ivory);">
+        <th style="padding:12px 16px; text-align:left; font-weight:400; letter-spacing:2px; font-size:11px; text-transform:uppercase;">Item</th>
+        <th style="padding:12px 16px; text-align:left; font-weight:400; letter-spacing:2px; font-size:11px; text-transform:uppercase;">Colour</th>
+        <th style="padding:12px 16px; text-align:left; font-weight:400; letter-spacing:2px; font-size:11px; text-transform:uppercase;">Use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #e0dbd3;">
+        <td style="padding:12px 16px;">Deep Red Roses</td>
+        <td style="padding:12px 16px;"><span style="display:inline-block; width:12px; height:12px; background:#A50C1C; border-radius:50%; margin-right:6px; vertical-align:middle;"></span>Crimson</td>
+        <td style="padding:12px 16px;">Welcome urns, aisle garland tips, column capitals, seating markers</td>
+      </tr>
+      <tr style="background:#f9f6f2; border-bottom:1px solid #e0dbd3;">
+        <td style="padding:12px 16px;">Jasmine Garlands (malli)</td>
+        <td style="padding:12px 16px;"><span style="display:inline-block; width:12px; height:12px; background:#FAF7F2; border:1px solid #ccc; border-radius:50%; margin-right:6px; vertical-align:middle;"></span>White</td>
+        <td style="padding:12px 16px;">Hanging ceiling strands, column wrapping, platform border</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e0dbd3;">
+        <td style="padding:12px 16px;">White Button Chrysanthemums</td>
+        <td style="padding:12px 16px;"><span style="display:inline-block; width:12px; height:12px; background:#f5f5f5; border:1px solid #ccc; border-radius:50%; margin-right:6px; vertical-align:middle;"></span>White</td>
+        <td style="padding:12px 16px;">Mandap arch framing</td>
+      </tr>
+      <tr style="background:#f9f6f2; border-bottom:1px solid #e0dbd3;">
+        <td style="padding:12px 16px;">Eucalyptus / Sage Foliage</td>
+        <td style="padding:12px 16px;"><span style="display:inline-block; width:12px; height:12px; background:#7A9E7E; border-radius:50%; margin-right:6px; vertical-align:middle;"></span>Sage Green</td>
+        <td style="padding:12px 16px;">Welcome urns, mandap arch, seating markers</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e0dbd3;">
+        <td style="padding:12px 16px;">Marigold Petals (loose)</td>
+        <td style="padding:12px 16px;"><span style="display:inline-block; width:12px; height:12px; background:#E8A020; border-radius:50%; margin-right:6px; vertical-align:middle;"></span>Amber</td>
+        <td style="padding:12px 16px;">Scattered on mandap platform floor — traditional, sacred</td>
+      </tr>
+      <tr style="background:#f9f6f2; border-bottom:1px solid #e0dbd3;">
+        <td style="padding:12px 16px;">Ivory Organza Fabric</td>
+        <td style="padding:12px 16px;"><span style="display:inline-block; width:12px; height:12px; background:#FAF7F2; border:1px solid #ddd; border-radius:50%; margin-right:6px; vertical-align:middle;"></span>Ivory</td>
+        <td style="padding:12px 16px;">Aisle edge runners, chair sashes</td>
+      </tr>
+      <tr>
+        <td style="padding:12px 16px;">Warm White Fairy Lights (LED)</td>
+        <td style="padding:12px 16px;"><span style="display:inline-block; width:12px; height:12px; background:#FFF8E7; border:1px solid #ddd; border-radius:50%; margin-right:6px; vertical-align:middle;"></span>2700K warm</td>
+        <td style="padding:12px 16px;">Woven into ceiling lattice, window sill candles</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <em>"Serene &amp; Sacred"</em>
+  <span>A minimalist Hindu wedding — crimson, silver &amp; ivory</span>
+</footer>
+
+</body>
+</html>

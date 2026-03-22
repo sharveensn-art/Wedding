@@ -1,0 +1,8 @@
+# Exclude personal photos and binary files
+Bride Saree/
+Deco Sample/
+Temple Layout/
+*.jpg
+*.jpeg
+*.png
+*.pdf

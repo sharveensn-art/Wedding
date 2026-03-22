@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>3D Temple — Serene & Sacred</title>
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0d0703; overflow:hidden; font-family:'Georgia',serif; }
+    canvas { display:block; }
+    #loading {
+      position:fixed; inset:0; background:#0d0703;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      color:#C8A96E; z-index:200; transition:opacity 0.8s;
+    }
+    #loading h2  { font-size:20px; font-weight:normal; letter-spacing:6px; text-transform:uppercase; margin-bottom:10px; }
+    #load-status { font-size:11px; letter-spacing:2px; color:#888; margin-top:6px; }
+    #loading-bar { width:220px; height:1px; background:#222; margin-top:22px; }
+    #loading-fill{ height:1px; background:#C8A96E; width:0%; transition:width 0.4s; }
+    #err-msg     { color:#ff8866; font-size:11px; max-width:360px; text-align:center; line-height:1.9; margin-top:16px; display:none; white-space:pre-wrap; }
+    #retry-btn   { display:none; margin-top:18px; background:transparent; border:1px solid #C8A96E; color:#C8A96E; padding:10px 26px; cursor:pointer; font-size:10px; letter-spacing:3px; text-transform:uppercase; font-family:inherit; }
+    #overlay     { position:fixed; top:20px; left:50%; transform:translateX(-50%); text-align:center; pointer-events:none; z-index:10; display:none; }
+    #overlay h1  { font-size:15px; font-weight:normal; letter-spacing:5px; text-transform:uppercase; color:#C8A96E; }
+    #overlay p   { font-size:10px; letter-spacing:2px; color:rgba(200,185,165,0.5); margin-top:5px; }
+    #views       { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); display:none; gap:8px; z-index:10; flex-wrap:wrap; justify-content:center; }
+    .vbtn        { background:rgba(15,8,3,0.85); border:1px solid rgba(200,169,110,0.35); color:#C8A96E; padding:8px 16px; font-size:10px; letter-spacing:2.5px; cursor:pointer; text-transform:uppercase; transition:all 0.2s; font-family:inherit; }
+    .vbtn:hover  { background:rgba(165,12,28,0.35); border-color:rgba(165,12,28,0.55); }
+    .vbtn.active { background:rgba(165,12,28,0.55); border-color:#A50C1C; color:#fff; }
+    #legend      { position:fixed; right:18px; top:50%; transform:translateY(-50%); background:rgba(10,5,2,0.85); border:1px solid rgba(200,169,110,0.22); padding:16px 20px; color:#C6BBB7; font-size:10px; line-height:2.1; letter-spacing:0.8px; z-index:10; display:none; }
+    .ld          { display:flex; align-items:center; gap:9px; }
+    .lc          { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    #minimap     { position:fixed; left:18px; top:50%; transform:translateY(-50%); background:rgba(10,5,2,0.85); border:1px solid rgba(200,169,110,0.22); padding:12px; z-index:10; display:none; }
+    #minimap p   { color:#C8A96E; font-size:8px; letter-spacing:2px; text-transform:uppercase; text-align:center; margin-top:7px; }
+  </style>
+</head>
+<body>
+
+<div id="loading">
+  <h2>Serene &amp; Sacred</h2>
+  <p id="load-status">Loading Three.js…</p>
+  <div id="loading-bar"><div id="loading-fill"></div></div>
+  <div id="err-msg"></div>
+  <button id="retry-btn" onclick="location.reload()">↺ Retry</button>
+</div>
+
+<div id="overlay">
+  <h1>Temple 3D — Decoration Preview</h1>
+  <p>Left-drag: orbit &nbsp;·&nbsp; Right-drag: pan &nbsp;·&nbsp; Scroll: zoom</p>
+</div>
+<div id="legend">
+  <div class="ld"><div class="lc" style="background:#A50C1C;"></div> Deep Red Roses</div>
+  <div class="ld"><div class="lc" style="background:#faf5ee;border:1px solid #555;"></div> White Jasmine (Aisle)</div>
+  <div class="ld"><div class="lc" style="background:#C8A96E;"></div> Brass / Gold</div>
+  <div class="ld"><div class="lc" style="background:#d2ae88;"></div> Stone Pillars × 18</div>
+  <div class="ld"><div class="lc" style="background:#3d0a0a;"></div> Om Backdrop</div>
+  <div class="ld"><div class="lc" style="background:#ff9922;"></div> Brass Diyas (lit)</div>
+  <div class="ld"><div class="lc" style="background:#7a9e7e;"></div> Sage Greenery</div>
+  <div class="ld"><div class="lc" style="background:#E8A020;"></div> Marigold Petals</div>
+</div>
+<div id="minimap">
+  <canvas id="fp" width="110" height="170"></canvas>
+  <p>Floor Plan</p>
+</div>
+<div id="views">
+  <button class="vbtn active" data-view="overview">Overview</button>
+  <button class="vbtn" data-view="entrance">Entrance</button>
+  <button class="vbtn" data-view="aisle">Aisle</button>
+  <button class="vbtn" data-view="mandap">Mandap</button>
+  <button class="vbtn" data-view="top">Top Down</button>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   INLINE ORBIT CONTROLS — no CDN needed, pure JS
+   ═══════════════════════════════════════════════════════════════════════════ */
+function SimpleOrbitControls(camera, domElement) {
+  var scope = this;
+  this.camera      = camera;
+  this.domElement  = domElement;
+  this.target      = new THREE.Vector3();
+  this.enableDamping  = true;
+  this.dampingFactor  = 0.08;
+  this.minDistance    = 2;
+  this.maxDistance    = 80;
+  this.maxPolarAngle  = Math.PI * 0.84;
+  this.enabled        = true;
+
+  // internal spherical
+  var sph   = new THREE.Spherical();
+  var dTheta = 0, dPhi = 0, scale = 1;
+  var panOffset = new THREE.Vector3();
+
+  // init from current camera
+  var _offset = camera.position.clone().sub(this.target);
+  sph.setFromVector3(_offset);
+
+  this.update = function() {
+    sph.theta += dTheta;
+    sph.phi   += dPhi;
+    sph.phi    = Math.max(0.01, Math.min(scope.maxPolarAngle, sph.phi));
+    sph.radius = Math.max(scope.minDistance, Math.min(scope.maxDistance, sph.radius * scale));
+    scope.target.add(panOffset);
+    var offset = new THREE.Vector3().setFromSpherical(sph);
+    camera.position.copy(scope.target).add(offset);
+    camera.lookAt(scope.target);
+    if (scope.enableDamping) {
+      dTheta *= (1 - scope.dampingFactor);
+      dPhi   *= (1 - scope.dampingFactor);
+      panOffset.multiplyScalar(1 - scope.dampingFactor);
+    } else {
+      dTheta = 0; dPhi = 0; panOffset.set(0,0,0);
+    }
+    scale = 1;
+  };
+
+  // ── pointer tracking ──
+  var drag = false, panDrag = false, lx = 0, ly = 0;
+  var EL = domElement;
+
+  EL.addEventListener('mousedown', function(e) {
+    if (!scope.enabled) return;
+    e.preventDefault();
+    lx = e.clientX; ly = e.clientY;
+    if (e.button === 0) drag    = true;
+    if (e.button === 2) panDrag = true;
+  });
+  window.addEventListener('mousemove', function(e) {
+    if (!scope.enabled) return;
+    var dx = e.clientX - lx, dy = e.clientY - ly;
+    lx = e.clientX; ly = e.clientY;
+    if (drag) {
+      dTheta -= 2 * Math.PI * dx / EL.clientWidth  * 0.8;
+      dPhi   -= 2 * Math.PI * dy / EL.clientHeight * 0.8;
+    }
+    if (panDrag) {
+      var spd = sph.radius * 0.0012;
+      var right = new THREE.Vector3(), up = new THREE.Vector3();
+      camera.matrix.extractBasis(right, up, new THREE.Vector3());
+      panOffset.addScaledVector(right, -dx * spd);
+      panOffset.addScaledVector(up,     dy * spd);
+    }
+  });
+  window.addEventListener('mouseup',   function() { drag = false; panDrag = false; });
+  EL.addEventListener('wheel', function(e) {
+    if (!scope.enabled) return;
+    scale = e.deltaY < 0 ? 1/1.12 : 1.12;
+    e.preventDefault();
+  }, { passive: false });
+  EL.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+
+  // touch
+  var touches = {};
+  var lastPinchDist = null;
+  EL.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    for (var i=0;i<e.changedTouches.length;i++) {
+      var t=e.changedTouches[i]; touches[t.identifier]={x:t.clientX,y:t.clientY};
+    }
+    lastPinchDist=null;
+  }, {passive:false});
+  EL.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    var ids=Object.keys(touches);
+    if (ids.length===1) {
+      var t=e.changedTouches[0];
+      var dx=t.clientX-touches[t.identifier].x, dy=t.clientY-touches[t.identifier].y;
+      touches[t.identifier]={x:t.clientX,y:t.clientY};
+      dTheta -= 2*Math.PI*dx/EL.clientWidth *0.8;
+      dPhi   -= 2*Math.PI*dy/EL.clientHeight*0.8;
+    }
+    if (e.touches.length===2) {
+      var dx2=e.touches[0].clientX-e.touches[1].clientX;
+      var dy2=e.touches[0].clientY-e.touches[1].clientY;
+      var dist=Math.sqrt(dx2*dx2+dy2*dy2);
+      if (lastPinchDist) scale=lastPinchDist/dist;
+      lastPinchDist=dist;
+    }
+  }, {passive:false});
+  EL.addEventListener('touchend', function(e) {
+    for(var i=0;i<e.changedTouches.length;i++) delete touches[e.changedTouches[i].identifier];
+  });
+
+  // expose lerpTo helper for animated camera views
+  this.lerpTo = function(destPos, destTgt, dur) {
+    scope.enabled = false;
+    var sp = camera.position.clone(), st = scope.target.clone();
+    var t0 = performance.now();
+    (function tick(now) {
+      var raw = Math.min((now-t0)/dur, 1), e = raw<0.5?2*raw*raw:-1+(4-2*raw)*raw;
+      camera.position.lerpVectors(sp, destPos, e);
+      scope.target.lerpVectors(st, destTgt, e);
+      // recompute spherical so update() stays in sync
+      var off = camera.position.clone().sub(scope.target);
+      sph.setFromVector3(off);
+      dTheta=0; dPhi=0; panOffset.set(0,0,0);
+      camera.lookAt(scope.target);
+      raw<1 ? requestAnimationFrame(tick) : (scope.enabled=true);
+    })(t0);
+  };
+}
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+// ── Loading UI helpers ────────────────────────────────────────────────────────
+var fillEl   = document.getElementById('loading-fill');
+var statusEl = document.getElementById('load-status');
+var errEl    = document.getElementById('err-msg');
+var retryBtn = document.getElementById('retry-btn');
+
+function setProgress(pct, msg) {
+  if (pct  !== null) fillEl.style.width = pct + '%';
+  if (msg  !== undefined) statusEl.textContent = msg;
+}
+function showError(msg) {
+  errEl.textContent = msg; errEl.style.display = 'block';
+  retryBtn.style.display = 'inline-block';
+  statusEl.textContent = 'Failed'; fillEl.style.background = '#ff4444';
+}
+
+// ── Load Three.js only (controls are inlined above) ───────────────────────────
+setProgress(10, 'Loading Three.js…');
+
+function tryLoad(urls, idx, onOk) {
+  if (idx >= urls.length) {
+    showError(
+      'Could not load Three.js from any CDN.\n\n' +
+      'Tried:\n' + urls.map(function(u){ return '• '+u; }).join('\n') + '\n\n' +
+      'Please ensure your internet connection allows access to jsdelivr.net or unpkg.com,\n' +
+      'or ask IT to whitelist these domains.'
+    );
+    return;
+  }
+  var s = document.createElement('script');
+  s.src = urls[idx];
+  s.onload  = onOk;
+  s.onerror = function() { tryLoad(urls, idx+1, onOk); };
+  document.head.appendChild(s);
+}
+
+tryLoad([
+  'https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.min.js',
+  'https://unpkg.com/three@0.150.0/build/three.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
+], 0, function() {
+  setProgress(80, 'Building temple…');
+  setTimeout(function() {
+    try { buildScene(); }
+    catch(e) { showError('Scene error: ' + (e.message||e)); console.error(e); }
+  }, 40);
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+function buildScene() {
+
+  // ── Mini floor plan ────────────────────────────────────────────────────────
+  (function(){
+    var fc=document.getElementById('fp'), ctx=fc.getContext('2d'), W=110, H=170;
+    ctx.fillStyle='#1a0f08'; ctx.fillRect(0,0,W,H);
+    var sx=3.27,sz=4.0,ox=W/2,oz=8+30*sz;
+    var wx=function(x){return ox+x*sx;}, wz=function(z){return oz-z*sz;};
+    ctx.fillStyle='#2a1a0a'; ctx.fillRect(wx(-15),wz(-2),30*sx,28*sz);
+    ctx.strokeStyle='#C8A96E55'; ctx.lineWidth=0.8; ctx.strokeRect(wx(-15),wz(-2),30*sx,28*sz);
+    ctx.fillStyle='#1e1208'; ctx.fillRect(wx(-2.5),wz(10),5*sx,12*sz);
+    ctx.strokeStyle='#C8A96E55'; ctx.lineWidth=0.6; ctx.strokeRect(wx(-2.5),wz(10),5*sx,12*sz);
+    ctx.fillStyle='#ffffff18'; ctx.fillRect(wx(-1.4),wz(10),2.8*sx,12*sz);
+    ctx.fillStyle='#8a1010'; ctx.fillRect(wx(-5.5),wz(-28),11*sx,2*sz);
+    ctx.fillStyle='#5a3a1a40'; ctx.strokeStyle='#C8A96E88'; ctx.lineWidth=0.7;
+    ctx.fillRect(wx(-6.5),wz(-17),13*sx,10*sz); ctx.strokeRect(wx(-6.5),wz(-17),13*sx,10*sz);
+    ctx.fillStyle='#d2ae88';
+    [-4,-9,-14,-19,-24,-28].forEach(function(z){ [-13,13].forEach(function(x){ ctx.fillRect(wx(x)-2.5,wz(z)-2.5,5,5); }); });
+    ctx.fillStyle='#b08040';
+    [1,5,9].forEach(function(z){ [-2.5,2.5].forEach(function(x){ ctx.fillRect(wx(x)-2,wz(z)-2,4,4); }); });
+    ctx.fillStyle='#C8A96E33'; ctx.fillRect(wx(3),wz(14),6*sx,3.5*sz);
+    ctx.fillStyle='#C8A96Eaa'; ctx.font='6px sans-serif'; ctx.textAlign='left'; ctx.fillText('Welcome',wx(3)+2,wz(14)-3);
+    ctx.fillStyle='#C8A96E99'; ctx.font='bold 8px serif'; ctx.textAlign='center'; ctx.fillText('\u0950',wx(0),wz(-27.2));
+    ctx.font='6px sans-serif'; ctx.fillText('Mandap',wx(0),wz(-11.5)); ctx.fillText('Aisle',wx(0),wz(4)); ctx.fillText('Entrance \u2193',wx(0),wz(11.5));
+  })();
+
+  // ── Renderer ───────────────────────────────────────────────────────────────
+  var renderer = new THREE.WebGLRenderer({ antialias:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // Use whichever color API this Three.js version supports
+  if (THREE.SRGBColorSpace !== undefined)      renderer.outputColorSpace = THREE.SRGBColorSpace;
+  else if (THREE.sRGBEncoding !== undefined)   renderer.outputEncoding   = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.3;
+  document.body.appendChild(renderer.domElement);
+
+  // ── Scene ──────────────────────────────────────────────────────────────────
+  var scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x100704);
+  scene.fog = new THREE.Fog(0x100704, 50, 95);
+
+  // ── Camera ─────────────────────────────────────────────────────────────────
+  var camera = new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, 0.1, 200);
+  camera.position.set(38, 24, 22);
+
+  // ── Controls (our inlined implementation) ─────────────────────────────────
+  var controls = new SimpleOrbitControls(camera, renderer.domElement);
+  controls.target.set(0, 4, -6);
+  // re-init spherical from current position
+  (function(){ var off=camera.position.clone().sub(controls.target); controls.update(); })();
+
+  // ── Materials ──────────────────────────────────────────────────────────────
+  var M = {
+    stone:   new THREE.MeshStandardMaterial({color:0xd2ae88, roughness:0.88, metalness:0.04}),
+    floor:   new THREE.MeshStandardMaterial({color:0xede0c4, roughness:0.30}),
+    wall:    new THREE.MeshStandardMaterial({color:0xd8c4a0, roughness:0.85}),
+    lattice: new THREE.MeshStandardMaterial({color:0xb0882e, roughness:0.55, metalness:0.28}),
+    brass:   new THREE.MeshStandardMaterial({color:0xb08020, roughness:0.25, metalness:0.85, emissive:new THREE.Color(0x201000), emissiveIntensity:0.2}),
+    rose:    new THREE.MeshStandardMaterial({color:0xa50c1c, roughness:0.65, emissive:new THREE.Color(0x250005), emissiveIntensity:0.35}),
+    jasmine: new THREE.MeshStandardMaterial({color:0xfbf6ed, roughness:0.75}),
+    sage:    new THREE.MeshStandardMaterial({color:0x7a9e7e, roughness:0.90}),
+    aisle:   new THREE.MeshStandardMaterial({color:0xffffff, roughness:0.35}),
+    mandap:  new THREE.MeshStandardMaterial({color:0xe8d8b4, roughness:0.45}),
+    diya:    new THREE.MeshStandardMaterial({color:0xff9922, roughness:0.5, emissive:new THREE.Color(0xff6600), emissiveIntensity:1.5}),
+    marigld: new THREE.MeshStandardMaterial({color:0xe8900a, roughness:0.8, emissive:new THREE.Color(0x301500), emissiveIntensity:0.2}),
+    fairy:   new THREE.MeshStandardMaterial({color:0xfff8e0, roughness:0.5, emissive:new THREE.Color(0xfff5cc), emissiveIntensity:1.8}),
+    ivory:   new THREE.MeshStandardMaterial({color:0xfaf7f0, roughness:0.45}),
+    wood:    new THREE.MeshStandardMaterial({color:0x4a2e10, roughness:0.85}),
+    seat:    new THREE.MeshStandardMaterial({color:0xfaf4e6, roughness:0.55})
+  };
+
+  // ── Canvas textures ────────────────────────────────────────────────────────
+  function makeTex(w,h,fn){ var c=document.createElement('canvas'); c.width=w; c.height=h; fn(c.getContext('2d')); return new THREE.CanvasTexture(c); }
+
+  var omTex = makeTex(512,512,function(ctx){
+    var g=ctx.createRadialGradient(256,256,10,256,256,260);
+    g.addColorStop(0,'#5a1212'); g.addColorStop(1,'#2d0606');
+    ctx.fillStyle=g; ctx.fillRect(0,0,512,512);
+    ctx.shadowColor='rgba(255,180,60,0.7)'; ctx.shadowBlur=30;
+    ctx.fillStyle='#ffffff'; ctx.font='bold 240px serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('\u0950',256,265);
+    ctx.shadowBlur=0; ctx.strokeStyle='rgba(200,160,60,0.4)'; ctx.lineWidth=6; ctx.strokeRect(14,14,484,484);
+  });
+  var signTex = makeTex(512,384,function(ctx){
+    ctx.fillStyle='#faf7f0'; ctx.fillRect(0,0,512,384);
+    ctx.strokeStyle='#C8A96E'; ctx.lineWidth=4; ctx.strokeRect(12,12,488,360);
+    ctx.strokeStyle='#C8A96E'; ctx.lineWidth=1.5; ctx.strokeRect(22,22,468,340);
+    ctx.fillStyle='#2e2e2e'; ctx.font='italic 48px Georgia,serif'; ctx.textAlign='center'; ctx.fillText('Welcome',256,86);
+    ctx.strokeStyle='#A50C1C'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(90,108); ctx.lineTo(422,108); ctx.stroke();
+    ctx.fillStyle='#A50C1C'; ctx.font='bold 34px Georgia,serif'; ctx.fillText('Sharveen',256,190);
+    ctx.fillStyle='#888'; ctx.font='italic 22px Georgia,serif'; ctx.fillText('&',256,240);
+    ctx.fillStyle='#A50C1C'; ctx.font='bold 34px Georgia,serif'; ctx.fillText('[Partner]',256,295);
+    ctx.fillStyle='#bbb'; ctx.font='14px Georgia,serif'; ctx.fillText('2026',256,348);
+  });
+
+  function faces6(defaultMat, frontMat){ return [defaultMat,defaultMat,defaultMat,defaultMat,frontMat,defaultMat]; }
+  var omMats   = faces6(new THREE.MeshStandardMaterial({color:0x3d0a0a,roughness:0.9}), new THREE.MeshStandardMaterial({map:omTex,roughness:0.6}));
+  var signMats = faces6(new THREE.MeshStandardMaterial({color:0x9a7040,roughness:0.8}), new THREE.MeshStandardMaterial({map:signTex}));
+
+  // ── Lighting ───────────────────────────────────────────────────────────────
+  scene.add(new THREE.AmbientLight(0x4a2800, 0.38));
+  var sun=new THREE.DirectionalLight(0xfff5e0,0.85);
+  sun.position.set(10,25,15); sun.castShadow=true;
+  sun.shadow.mapSize.width=1024; sun.shadow.mapSize.height=1024;
+  sun.shadow.camera.near=1; sun.shadow.camera.far=120;
+  sun.shadow.camera.left=-32; sun.shadow.camera.right=32;
+  sun.shadow.camera.top=32; sun.shadow.camera.bottom=-42;
+  sun.shadow.bias=-0.001; scene.add(sun);
+
+  function pl(col,inten,dist,x,y,z){ var l=new THREE.PointLight(col,inten,dist); l.position.set(x,y,z); scene.add(l); return l; }
+  var omGlow=pl(0xff7722,2.8,22, 0,5.5,-27.5);
+  pl(0xffe4a0,0.7,40,-6,9,-14); pl(0xffe4a0,0.7,40,6,9,-14);
+  pl(0xffeecc,0.9,20,0,8,5);   pl(0xffcc66,1.2,15,6,4,12);
+  pl(0xffeeaa,1.0,10,-6.5,6.5,-28.8); pl(0xffeeaa,1.0,10,6.5,6.5,-28.8);
+
+  var MANDAP_CZ=-22, diyaLights=[];
+  for(var di=0;di<6;di++){
+    var da=(di/6)*Math.PI*2,dr=2.6;
+    var dl=pl(0xff8811,2.0,8,dr*Math.cos(da),0.7,MANDAP_CZ+dr*Math.sin(da));
+    dl._base=2.0; diyaLights.push(dl);
+  }
+  for(var fi=0;fi<12;fi++) pl(0xfff8e0,0.35,10,(Math.random()-0.5)*24,10.0,-3-fi*2.2);
+
+  // ── Instanced meshes ───────────────────────────────────────────────────────
+  var dummy=new THREE.Object3D();
+  function IM(geo,mat,n){ var m=new THREE.InstancedMesh(geo,mat,n); m.castShadow=false; scene.add(m); return m; }
+  var iJ=IM(new THREE.SphereGeometry(0.07,4,3),M.jasmine,2800);
+  var iR=IM(new THREE.SphereGeometry(0.13,6,5),M.rose,   800);
+  var iMG=IM(new THREE.SphereGeometry(0.07,4,3),M.marigld,300);
+  var iFL=IM(new THREE.SphereGeometry(0.055,4,3),M.fairy, 160);
+  var iBL=IM(new THREE.SphereGeometry(0.10,6,5),M.brass,  200);
+  var ji=0,ri=0,mgi=0,fli=0,bli=0;
+
+  var _s=42;
+  function rng(){ _s=(_s*1664525+1013904223)&0xffffffff; return (_s>>>0)/0xffffffff; }
+  function put(mesh,idx,x,y,z,s){
+    dummy.position.set(x,y,z); dummy.scale.setScalar((s||1)*(0.8+rng()*0.4));
+    dummy.rotation.set(rng()*6.28,rng()*6.28,rng()*6.28); dummy.updateMatrix();
+    mesh.setMatrixAt(idx,dummy.matrix);
+  }
+  function J(x,y,z,s){ if(ji<2800)  put(iJ, ji++,x,y,z,s); }
+  function R(x,y,z,s){ if(ri<800)   put(iR, ri++,x,y,z,s); }
+  function MG(x,y,z) { if(mgi<300)  put(iMG,mgi++,x,y,z,0.8+rng()*0.4); }
+  function FL(x,y,z) { if(fli<160)  put(iFL,fli++,x,y,z,1); }
+  function BL(x,y,z) { if(bli<200)  put(iBL,bli++,x,y,z,1); }
+
+  function box(w,h,d,x,y,z,mat){ var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat); m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; scene.add(m); return m; }
+
+  // ── Floors ─────────────────────────────────────────────────────────────────
+  var HALL_H=11,AISLE_H=9;
+  var mhFloor=new THREE.Mesh(new THREE.PlaneGeometry(30,28),M.floor); mhFloor.rotation.x=-Math.PI/2; mhFloor.position.set(0,0,-16); mhFloor.receiveShadow=true; scene.add(mhFloor);
+  var aiFloor=new THREE.Mesh(new THREE.PlaneGeometry(5,12),M.floor);  aiFloor.rotation.x=-Math.PI/2; aiFloor.position.set(0,0,4);   aiFloor.receiveShadow=true; scene.add(aiFloor);
+  // Carpet: from aisle entrance (z=10) to front of mandap (z=-27) — length 37, centre z=-8.5
+  var carpetMat = new THREE.MeshStandardMaterial({color:0xc8102e, roughness:0.7});
+  var runner=new THREE.Mesh(new THREE.PlaneGeometry(2.6,37),carpetMat); runner.rotation.x=-Math.PI/2; runner.position.set(0,0.006,-8.5); scene.add(runner);
+  // Carpet border (thin gold trim lines on each edge)
+  var trimMat = new THREE.MeshStandardMaterial({color:0xC8A96E, roughness:0.4, metalness:0.3});
+  [-1.4,1.4].forEach(function(ox){ var trim=new THREE.Mesh(new THREE.PlaneGeometry(0.08,37),trimMat); trim.rotation.x=-Math.PI/2; trim.position.set(ox,0.007,-8.5); scene.add(trim); });
+
+  // ── Walls ──────────────────────────────────────────────────────────────────
+  // fully open-air — no walls
+
+  // ── Ceiling ────────────────────────────────────────────────────────────────
+  for(var cx=-13.75;cx<=14;cx+=2.5) box(0.18,0.32,28,cx,HALL_H+0.16,-16,M.lattice);
+  for(var cz=-3.5;cz>=-29;cz-=2.5) box(30,0.32,0.18,0,HALL_H+0.16,cz,M.lattice);
+  var mhC=new THREE.Mesh(new THREE.PlaneGeometry(30,28),M.lattice); mhC.rotation.x=Math.PI/2; mhC.position.set(0,HALL_H+0.33,-16); scene.add(mhC);
+  for(var acx=-2;acx<=2;acx+=1.3) box(0.12,0.24,12,acx,AISLE_H+0.12,4,M.lattice);
+  for(var acz=1;acz<=9;acz+=1.5)  box(5,0.24,0.12,0,AISLE_H+0.12,acz,M.lattice);
+  var aiC=new THREE.Mesh(new THREE.PlaneGeometry(5,12),M.lattice); aiC.rotation.x=Math.PI/2; aiC.position.set(0,AISLE_H+0.25,4); scene.add(aiC);
+
+  for(var bx=-12;bx<=12;bx+=3){
+    for(var bz=-5;bz>=-28;bz-=3){
+      BL(bx,HALL_H-0.25,bz);
+      var bstem=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.28,4),M.brass); bstem.position.set(bx,HALL_H-0.02,bz); scene.add(bstem);
+    }
+  }
+  for(var flx=-12;flx<=12;flx+=4) for(var flz=-5;flz>=-27;flz-=4) FL(flx+(rng()-0.5),HALL_H-0.05,flz+(rng()-0.5));
+  for(var alz=1;alz<=9;alz+=2) FL((rng()-0.5)*1.2,AISLE_H-0.06,alz);
+
+  // ── Column builder (18 total) ──────────────────────────────────────────────
+  function makeCol(cx,cz,height){
+    var g=new THREE.Group(); g.position.set(cx,0,cz);
+    var slab=new THREE.Mesh(new THREE.BoxGeometry(1.4,0.5,1.4),M.stone); slab.position.y=0.25; slab.castShadow=true; g.add(slab);
+    var shaft=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.62,height-1.2,10),M.stone); shaft.position.y=0.5+(height-1.2)/2; shaft.castShadow=true; g.add(shaft);
+    var ring=new THREE.Mesh(new THREE.TorusGeometry(0.53,0.06,6,16),M.stone); ring.position.y=0.5+(height-1.2)*0.4; ring.rotation.x=Math.PI/2; g.add(ring);
+    var cap=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.55,1.2),M.stone); cap.position.y=height-0.45; cap.castShadow=true; g.add(cap);
+    var capT=new THREE.Mesh(new THREE.BoxGeometry(1.45,0.22,1.45),M.stone); capT.position.y=height-0.05; g.add(capT);
+    scene.add(g);
+    for(var d=0;d<55;d++){ var t=d/55,ang=t*7*Math.PI*2,sy=0.6+t*(height-1.5); J(cx+0.68*Math.cos(ang),sy,cz+0.68*Math.sin(ang),0.9); }
+    for(var r=0;r<7;r++){ var ra=(r/7)*Math.PI*2; R(cx+0.38*Math.cos(ra),height+0.1,cz+0.38*Math.sin(ra),1.05); }
+    R(cx,height+0.25,cz,1.1);
+  }
+  [-4,-9,-14,-19,-24,-28].forEach(function(z){ makeCol(-13,z,HALL_H); makeCol(13,z,HALL_H); });
+  [1,5,9].forEach(function(z){ makeCol(-2.5,z,AISLE_H); makeCol(2.5,z,AISLE_H); });
+
+  // ── Hanging jasmine garlands — AISLE ONLY ─────────────────────────────────
+  [3,7].forEach(function(gz){
+    [-0.7,0,0.7].forEach(function(gx){
+      var top=AISLE_H-0.45,bot=top-2.25,len=top-bot; // quarter of pillar height (9/4 ≈ 2.25)
+      var st=new THREE.Mesh(new THREE.CylinderGeometry(0.022,0.022,len,4),M.jasmine); st.position.set(gx,top-len/2,gz); scene.add(st);
+      for(var s=0;s<=28;s++){ var t=s/28; J(gx+(rng()-0.5)*0.13,top-t*len,gz+(rng()-0.5)*0.13,1.0); }
+      for(var r=0;r<6;r++) R(gx+(rng()-0.5)*0.24,bot+(rng()-0.5)*0.18,gz+(rng()-0.5)*0.24,1.05);
+    });
+  });
+
+  // ── Om backdrop ────────────────────────────────────────────────────────────
+  var omMesh=new THREE.Mesh(new THREE.BoxGeometry(11,8,0.5),omMats); omMesh.position.set(0,4.5,-29.75); omMesh.castShadow=true; scene.add(omMesh);
+  var gfH=new THREE.Mesh(new THREE.BoxGeometry(11.5,0.18,0.12),M.brass), gfV=new THREE.Mesh(new THREE.BoxGeometry(0.18,8.4,0.12),M.brass);
+  [-4.5,4.5].forEach(function(dy){ var f=gfH.clone(); f.position.set(0,4.5+dy,-29.47); scene.add(f); });
+  [-5.75,5.75].forEach(function(dx){ var f=gfV.clone(); f.position.set(dx,4.5,-29.47); scene.add(f); });
+  for(var as=0;as<=28;as++){
+    var aa=(as/28)*Math.PI,aax=Math.cos(aa)*6.5,aay=4.5+Math.sin(aa)*4.8;
+    J(aax,aay,-29.28,1.25); J(aax+(rng()-0.5)*0.28,aay+(rng()-0.5)*0.25,-29.2,1.05);
+    if(as%3===0) R(aax+(rng()-0.5)*0.18,aay+(rng()-0.5)*0.18,-29.1,1.0);
+    if(as%4===2){ var lf=new THREE.Mesh(new THREE.SphereGeometry(0.11,4,3),M.sage); lf.scale.set(1.5,0.5,1); lf.position.set(Math.cos(aa)*7,aay,-29.0); scene.add(lf); }
+  }
+  [[-6.5,-28.8],[6.5,-28.8]].forEach(function(p){
+    box(0.09,6,0.09,p[0],3,p[1],M.brass);
+    var sh=new THREE.Mesh(new THREE.ConeGeometry(0.45,0.65,8),M.brass); sh.position.set(p[0],6.4,p[1]); scene.add(sh);
+    var bs=new THREE.Mesh(new THREE.CylinderGeometry(0.28,0.32,0.12,8),M.brass); bs.position.set(p[0],0.06,p[1]); scene.add(bs);
+  });
+
+  // ── Mandap ─────────────────────────────────────────────────────────────────
+  var mandap=new THREE.Mesh(new THREE.BoxGeometry(13,0.45,10),M.mandap); mandap.position.set(0,0.22,MANDAP_CZ); mandap.receiveShadow=true; mandap.castShadow=true; scene.add(mandap);
+  var tH2=new THREE.Mesh(new THREE.BoxGeometry(13.1,0.08,0.08),M.brass), tV2=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.08,10.1),M.brass);
+  [-5,5].forEach(function(d){ var t=tH2.clone(); t.position.set(0,0.49,MANDAP_CZ+d); scene.add(t); });
+  [-6.5,6.5].forEach(function(d){ var t=tV2.clone(); t.position.set(d,0.49,MANDAP_CZ); scene.add(t); });
+  for(var ms=0;ms<80;ms++){
+    var mt=ms/80,mbx,mbz;
+    if(mt<0.25)      {mbx=-6.5+mt*4*13;mbz=MANDAP_CZ-5;}
+    else if(mt<0.5)  {mbx=6.5;mbz=MANDAP_CZ-5+(mt-0.25)*4*10;}
+    else if(mt<0.75) {mbx=6.5-(mt-0.5)*4*13;mbz=MANDAP_CZ+5;}
+    else             {mbx=-6.5;mbz=MANDAP_CZ+5-(mt-0.75)*4*10;}
+    J(mbx,0.56,mbz,0.85);
+  }
+  for(var di2=0;di2<6;di2++){
+    var da2=(di2/6)*Math.PI*2,dr2=2.6,ddx=dr2*Math.cos(da2),ddz=MANDAP_CZ+dr2*Math.sin(da2);
+    var dy2=new THREE.Mesh(new THREE.CylinderGeometry(0.18,0.22,0.14,8),M.brass); dy2.position.set(ddx,0.52,ddz); scene.add(dy2);
+    var fl2=new THREE.Mesh(new THREE.SphereGeometry(0.09,5,4),M.diya); fl2.position.set(ddx,0.73,ddz); scene.add(fl2);
+  }
+  for(var mp=0;mp<140;mp++) MG((rng()-0.5)*11,0.46,MANDAP_CZ+(rng()-0.5)*8);
+
+  // ── Seating ────────────────────────────────────────────────────────────────
+  [-5.5,-10,-15,-20].forEach(function(rz){
+    [-8.5,8.5].forEach(function(sx){
+      var mat=new THREE.Mesh(new THREE.BoxGeometry(4.5,0.06,0.9),M.seat); mat.position.set(sx,0.03,rz); mat.receiveShadow=true; scene.add(mat);
+      var msx=sx>0?sx-2.25:sx+2.25; R(msx,0.22,rz,0.85); R(msx+(rng()-0.5)*0.2,0.23,rz+(rng()-0.5)*0.2,0.7);
+    });
+  });
+
+  // ── Welcome area ───────────────────────────────────────────────────────────
+  box(5.5,0.1,2,6,0.05,12.5,M.ivory);
+  [-0.5,0.5].forEach(function(ox){ var leg=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,3.5,5),M.wood); leg.rotation.z=ox*0.28; leg.position.set(6+ox,1.75,12.5+ox*0.18); scene.add(leg); });
+  var bleg=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,3.5,5),M.wood); bleg.rotation.x=-0.45; bleg.position.set(6,1.6,13.2); scene.add(bleg);
+  var sign=new THREE.Mesh(new THREE.BoxGeometry(2.2,1.65,0.08),signMats); sign.position.set(6,2.65,12.5); sign.castShadow=true; scene.add(sign);
+  for(var sr=0;sr<12;sr++){ var sa=(sr/12)*Math.PI*2; R(6+Math.cos(sa)*1.2,1.8+Math.sin(Math.abs(sa-Math.PI)*0.5)*0.38,12.52,0.9); }
+  for(var sjr=0;sjr<8;sjr++) J(6+Math.cos((sjr/8)*Math.PI*2)*1.32,1.72+Math.sin((sjr/8)*Math.PI*2)*0.28,12.52,1.05);
+  [3.9,8.1].forEach(function(ux){
+    var u=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.26,0.65,10),M.brass); u.position.set(ux,0.33,12.3); scene.add(u);
+    var un=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.35,0.2,10),M.brass); un.position.set(ux,0.76,12.3); scene.add(un);
+    for(var ur=0;ur<9;ur++){ var ua=(ur/9)*Math.PI*2,urr=0.2+rng()*0.1; R(ux+urr*Math.cos(ua),0.92+rng()*0.28,12.3+urr*Math.sin(ua),1.2); }
+    for(var ug=0;ug<5;ug++){ var ul=new THREE.Mesh(new THREE.SphereGeometry(0.1,4,3),M.sage); ul.scale.set(1.5,0.5,1); ul.position.set(ux+(rng()-0.5)*0.5,0.95+rng()*0.22,12.3+(rng()-0.5)*0.5); scene.add(ul); }
+  });
+  [3.1,9.0,3.6,8.5].forEach(function(ccx,ci){
+    var ccz=ci<2?11.8:12.9;
+    var co=new THREE.Mesh(new THREE.ConeGeometry(0.16,1.6,6),M.brass); co.position.set(ccx,0.8,ccz); scene.add(co);
+    var cb=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,0.12,6),M.brass); cb.position.set(ccx,0.06,ccz); scene.add(cb);
+  });
+  for(var pp=0;pp<20;pp++) R(3.8+rng()*4.4,0.12,12+(rng()-0.5)*1.3,0.5);
+
+  // ── Flush instanced ────────────────────────────────────────────────────────
+  [iJ,iR,iMG,iFL,iBL].forEach(function(m){ m.instanceMatrix.needsUpdate=true; });
+
+  // ── Camera view buttons ────────────────────────────────────────────────────
+  var VIEWS={
+    overview:[[38,24,22],[0,4,-6]],
+    entrance:[[8,5.5,18],[3,2.5,10]],
+    aisle:   [[0,3,14],[0,4,-2]],
+    mandap:  [[10,6,-12],[0,4.5,-29]],
+    top:     [[0,50,-10],[0,0,-10]]
+  };
+  document.querySelectorAll('.vbtn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.vbtn').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      var v=VIEWS[btn.dataset.view];
+      controls.lerpTo(new THREE.Vector3(v[0][0],v[0][1],v[0][2]), new THREE.Vector3(v[1][0],v[1][1],v[1][2]), 1400);
+    });
+  });
+
+  window.addEventListener('resize',function(){ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth,window.innerHeight); });
+
+  // ── Render loop ────────────────────────────────────────────────────────────
+  setProgress(100,'');
+  var firstFrame=true, clock=new THREE.Clock();
+  (function animate(){
+    requestAnimationFrame(animate);
+    var t=clock.getElapsedTime();
+    for(var i=0;i<diyaLights.length;i++){ var dl=diyaLights[i]; dl.intensity=dl._base*(0.88+0.18*Math.sin(t*3.5+i*1.3)+0.07*Math.sin(t*7.1+i)); }
+    omGlow.intensity=2.2+0.7*Math.sin(t*0.85);
+    controls.update();
+    renderer.render(scene,camera);
+    if(firstFrame){
+      firstFrame=false;
+      var ld=document.getElementById('loading');
+      ld.style.opacity='0'; setTimeout(function(){ld.style.display='none';},800);
+      document.getElementById('overlay').style.display='block';
+      document.getElementById('views').style.display='flex';
+      document.getElementById('legend').style.display='block';
+      document.getElementById('minimap').style.display='block';
+    }
+  })();
+}
+</script>
+</body>
+</html>
