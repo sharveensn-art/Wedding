@@ -1,4 +1,4 @@
-# Exclude personal photos and binary files
+# Personal photos and binary files
 Bride Saree/
 Deco Sample/
 Temple Layout/
@@ -6,3 +6,6 @@ Temple Layout/
 *.jpeg
 *.png
 *.pdf
+
+# E-Card: Supabase credentials (never commit these)
+E-Card/config.js

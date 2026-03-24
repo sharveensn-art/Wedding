@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedding Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Lato:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="admin-body">
+
+<!-- ── LOGIN ──────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1 style="font-family:var(--font-serif); font-size:1.8rem; margin-bottom:.25rem;">Wedding Admin</h1>
+    <p style="color:var(--muted); font-size:.85rem; margin-bottom:1.5rem;">Enter password to continue</p>
+    <input type="password" id="pw-input" placeholder="Password" style="margin-bottom:.75rem;" />
+    <button class="btn btn-primary" style="width:100%;" onclick="checkPassword()">Login</button>
+    <p class="error hidden" id="pw-error" style="margin-top:.5rem;">Incorrect password.</p>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ──────────────────────────────────────────── -->
+<div id="dashboard" class="hidden">
+
+  <header class="admin-header">
+    <div>
+      <h1>Wedding Dashboard</h1>
+      <p id="admin-wedding-title"></p>
+    </div>
+    <div style="display:flex; gap:.75rem; align-items:center; flex-wrap:wrap;">
+      <button class="btn btn-outline" onclick="openAddGuest()">+ Add Guest</button>
+      <button class="btn btn-outline" onclick="openUpload()">⬆ Upload List</button>
+      <button class="btn btn-outline" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn btn-outline" onclick="loadAll()">↻ Refresh</button>
+    </div>
+  </header>
+
+  <!-- Summary cards -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="s-num" id="s-total">—</div>
+      <div class="s-label">Total Invited</div>
+    </div>
+    <div class="summary-card confirmed">
+      <div class="s-num" id="s-confirmed">—</div>
+      <div class="s-label">Confirmed</div>
+    </div>
+    <div class="summary-card pending">
+      <div class="s-num" id="s-pending">—</div>
+      <div class="s-label">Pending</div>
+    </div>
+    <div class="summary-card declined">
+      <div class="s-num" id="s-declined">—</div>
+      <div class="s-label">Declined</div>
+    </div>
+    <div class="summary-card pax">
+      <div class="s-num" id="s-pax">—</div>
+      <div class="s-label">Total Pax</div>
+    </div>
+  </div>
+
+  <!-- Side breakdown -->
+  <div class="side-breakdown">
+    <div class="side-card bride-card">
+      <div class="side-label">Bride's Guests</div>
+      <div class="side-stats">
+        <span>✅ <strong id="b-confirmed">0</strong> confirmed</span>
+        <span>⏳ <strong id="b-pending">0</strong> pending</span>
+        <span>👥 <strong id="b-pax">0</strong> pax</span>
+      </div>
+    </div>
+    <div class="side-card groom-card">
+      <div class="side-label">Groom's Guests</div>
+      <div class="side-stats">
+        <span>✅ <strong id="g-confirmed">0</strong> confirmed</span>
+        <span>⏳ <strong id="g-pending">0</strong> pending</span>
+        <span>👥 <strong id="g-pax">0</strong> pax</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <select id="filter-side" onchange="applyFilters()">
+      <option value="">All (Bride + Groom)</option>
+      <option value="bride">Bride's Guests</option>
+      <option value="groom">Groom's Guests</option>
+    </select>
+    <select id="filter-status" onchange="applyFilters()">
+      <option value="">All Statuses</option>
+      <option value="pending">Pending</option>
+      <option value="confirmed">Confirmed</option>
+      <option value="declined">Declined</option>
+    </select>
+    <input type="text" id="filter-search" placeholder="Search by name…" oninput="applyFilters()" style="max-width:220px;" />
+  </div>
+
+  <!-- Guest table -->
+  <div class="table-wrap">
+    <table class="guest-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Side</th>
+          <th>Max Pax</th>
+          <th>Status</th>
+          <th>Attending</th>
+          <th>Table</th>
+          <th>Dietary</th>
+          <th>Invite Link</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="guest-tbody"></tbody>
+    </table>
+    <p id="no-results" class="hidden" style="text-align:center; padding:2rem; color:var(--muted);">No guests found.</p>
+  </div>
+
+</div><!-- /#dashboard -->
+
+<!-- ── ADD GUEST MODAL ────────────────────────────────────── -->
+<div id="modal-overlay" class="hidden" onclick="closeModal(event)">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <h2 style="font-family:var(--font-serif); margin-bottom:1.25rem;">Add Guest</h2>
+
+    <div class="form-group">
+      <label>Family / Contact Name</label>
+      <input type="text" id="new-name" placeholder="e.g. Ahmad & Family" />
+    </div>
+    <div class="form-group">
+      <label>Side</label>
+      <select id="new-side">
+        <option value="bride">Bride</option>
+        <option value="groom">Groom</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Max Pax Allowed</label>
+      <select id="new-pax">
+        <option value="2">2 pax</option>
+        <option value="4">4 pax</option>
+      </select>
+    </div>
+
+    <p class="error hidden" id="modal-error"></p>
+
+    <div style="display:flex; gap:.75rem; margin-top:1rem;">
+      <button class="btn btn-primary" style="flex:1;" onclick="addGuest()">Add Guest</button>
+      <button class="btn btn-outline" style="flex:1;" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── UPLOAD MODAL ───────────────────────────────────────── -->
+<div id="upload-overlay" class="hidden" onclick="closeUpload(event)">
+  <div class="modal-card" style="max-width:600px;" onclick="event.stopPropagation()">
+    <h2 style="font-family:var(--font-serif); margin-bottom:.4rem;">Upload Guest List</h2>
+    <p style="color:var(--muted); font-size:.85rem; margin-bottom:1.25rem;">
+      Upload a <strong>.csv</strong> or <strong>.xlsx</strong> file.
+      <button class="copy-link-btn" onclick="downloadTemplate()">Download template</button>
+    </p>
+
+    <!-- File drop zone -->
+    <div id="drop-zone" class="drop-zone" onclick="document.getElementById('file-input').click()">
+      <div id="drop-label">
+        <div style="font-size:2rem; margin-bottom:.5rem;">📂</div>
+        <p>Click to choose a file, or drag & drop here</p>
+        <p style="font-size:.8rem; color:var(--muted); margin-top:.25rem;">.csv or .xlsx accepted</p>
+      </div>
+      <input type="file" id="file-input" accept=".csv,.xlsx" style="display:none;" onchange="handleFileSelect(event)" />
+    </div>
+
+    <!-- Preview -->
+    <div id="upload-preview" class="hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin:.75rem 0 .4rem;">
+        <p style="font-size:.85rem; color:var(--muted);">
+          Preview — <strong id="preview-count">0</strong> rows
+          <span id="preview-warn" style="color:#c0392b;" class="hidden"> · <span id="preview-warn-msg"></span></span>
+        </p>
+        <button class="act-btn" onclick="resetUpload()">Clear</button>
+      </div>
+      <div style="overflow-x:auto; max-height:220px; overflow-y:auto;">
+        <table class="guest-table" style="min-width:unset;">
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Side</th><th>Max Pax</th><th>Valid?</th>
+            </tr>
+          </thead>
+          <tbody id="preview-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="error hidden" id="upload-error" style="margin-top:.75rem;"></p>
+
+    <div style="display:flex; gap:.75rem; margin-top:1.25rem;">
+      <button class="btn btn-primary" id="import-btn" style="flex:1;" onclick="importGuests()" disabled>
+        Import Guests
+      </button>
+      <button class="btn btn-outline" style="flex:1;" onclick="closeUpload()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>

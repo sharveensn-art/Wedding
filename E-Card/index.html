@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wedding Invitation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Lato:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ── HERO ──────────────────────────────────────────────── -->
+<section class="hero">
+  <p class="hero-bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيم</p>
+  <p class="hero-invite-label">Together with their families</p>
+
+  <h1 class="hero-names">
+    <span id="hero-bride"></span>
+    <em class="hero-ampersand">&amp;</em>
+    <span id="hero-groom"></span>
+  </h1>
+
+  <p class="hero-date" id="hero-date"></p>
+
+  <a href="#rsvp" class="btn btn-primary">RSVP Now</a>
+</section>
+
+<!-- ── EVENT DETAILS ─────────────────────────────────────── -->
+<section class="details">
+  <h2 style="font-size:1.8rem; margin-bottom:.3rem;">You're Invited</h2>
+  <p style="color:var(--muted); font-size:.9rem;">Join us as we celebrate our union</p>
+
+  <div class="divider">✦</div>
+
+  <div class="details-grid">
+    <div class="detail-card">
+      <div class="icon">📅</div>
+      <div class="label">Date</div>
+      <div class="value" id="detail-date"></div>
+    </div>
+    <div class="detail-card">
+      <div class="icon">🕐</div>
+      <div class="label">Time</div>
+      <div class="value" id="detail-time"></div>
+    </div>
+    <div class="detail-card" style="grid-column: span 2;">
+      <div class="icon">📍</div>
+      <div class="label">Venue</div>
+      <div class="value" id="detail-venue"></div>
+      <a class="map-link" id="detail-map" href="#" target="_blank" rel="noopener">
+        📌 Open in Maps
+      </a>
+    </div>
+    <div class="detail-card" style="grid-column: span 2;">
+      <div class="icon">👗</div>
+      <div class="label">Dress Code</div>
+      <div class="value" id="detail-dresscode"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── RSVP SECTION ───────────────────────────────────────── -->
+<section class="rsvp-section" id="rsvp">
+  <h2>RSVP</h2>
+  <p class="subtitle" id="rsvp-subtitle"></p>
+
+  <div class="rsvp-card">
+
+    <!-- Loading state -->
+    <div id="state-loading" style="text-align:center; padding:2rem; color:var(--muted);">
+      Loading your invitation…
+    </div>
+
+    <!-- Invalid / expired token -->
+    <div id="state-invalid" class="hidden" style="text-align:center; padding:2rem;">
+      <div style="font-size:2rem; margin-bottom:1rem;">🔗</div>
+      <h3 style="font-family:var(--font-serif); margin-bottom:.5rem;">Invalid Link</h3>
+      <p style="color:var(--muted); font-size:.9rem;">This invitation link is not valid. Please check the link you received.</p>
+    </div>
+
+    <!-- Already responded -->
+    <div id="state-done" class="hidden success-msg">
+      <div class="tick">✅</div>
+      <h3>You've already responded!</h3>
+      <p id="done-msg"></p>
+    </div>
+
+    <!-- RSVP Closed -->
+    <div id="state-closed" class="hidden" style="text-align:center; padding:2rem;">
+      <div style="font-size:2rem; margin-bottom:1rem;">🔒</div>
+      <h3 style="font-family:var(--font-serif); margin-bottom:.5rem;">RSVP Closed</h3>
+      <p style="color:var(--muted); font-size:.9rem;">The RSVP deadline has passed. We look forward to seeing you!</p>
+    </div>
+
+    <!-- RSVP Form -->
+    <div id="state-form" class="hidden">
+      <p class="guest-greeting">Dear <strong id="guest-name-display"></strong>,</p>
+      <p style="font-size:.9rem; color:var(--muted); text-align:center; margin-bottom:1.5rem;">
+        Will you be joining us on our special day?
+      </p>
+
+      <form id="rsvp-form" novalidate>
+
+        <!-- Attendance -->
+        <div class="form-group">
+          <label>Will you attend?</label>
+          <div class="attendance-btns">
+            <button type="button" class="attendance-btn" id="btn-yes" onclick="selectAttendance('yes')">
+              🎉 Joyfully Accept
+            </button>
+            <button type="button" class="attendance-btn" id="btn-no" onclick="selectAttendance('no')">
+              😢 Regretfully Decline
+            </button>
+          </div>
+          <p class="error hidden" id="err-attendance">Please select an option.</p>
+        </div>
+
+        <!-- Attending fields -->
+        <div id="attending-fields" class="hidden">
+
+          <!-- Pax count -->
+          <div class="form-group">
+            <label>Number of guests attending <span id="pax-limit-label" style="font-weight:400; text-transform:none;">(max <span id="pax-max"></span>)</span></label>
+            <div class="pax-counter">
+              <button type="button" class="pax-btn" onclick="changePax(-1)">−</button>
+              <span class="pax-num" id="pax-display">1</span>
+              <button type="button" class="pax-btn" onclick="changePax(1)">+</button>
+            </div>
+          </div>
+
+          <!-- Attendee names -->
+          <div class="form-group">
+            <label>Names of attendees</label>
+            <div id="attendee-names"></div>
+          </div>
+
+          <!-- Dietary notes -->
+          <div class="form-group">
+            <label>Dietary requirements / allergies <span style="font-weight:400;">(optional)</span></label>
+            <textarea id="dietary" rows="2" placeholder="e.g. vegetarian, nut allergy…"></textarea>
+          </div>
+
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-submit" id="submit-btn">
+          Send RSVP
+        </button>
+        <p class="error hidden" id="err-submit"></p>
+
+      </form>
+    </div>
+
+    <!-- Success -->
+    <div id="state-success" class="hidden success-msg">
+      <div class="tick">🎊</div>
+      <h3 id="success-title"></h3>
+      <p id="success-msg"></p>
+    </div>
+
+  </div><!-- /.rsvp-card -->
+
+  <p class="deadline-notice" id="deadline-notice"></p>
+
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <p id="footer-names"></p>
+  <p style="margin-top:.3rem;">Made with ♡</p>
+</footer>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/invite.js"></script>
+</body>
+</html>

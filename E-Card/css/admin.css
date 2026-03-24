@@ -1,0 +1,274 @@
+/* ── Admin layout ─────────────────────────────────────────── */
+.admin-body {
+  background: #f5f0ec;
+  min-height: 100vh;
+}
+
+/* ── Login ────────────────────────────────────────────────── */
+#login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.login-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.admin-header {
+  background: var(--white);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem;
+  box-shadow: 0 2px 8px rgba(58,46,40,.06);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.admin-header h1 {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  color: var(--dark);
+}
+
+.admin-header p {
+  font-size: .8rem;
+  color: var(--muted);
+}
+
+/* ── Summary cards ────────────────────────────────────────── */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: .75rem;
+  padding: 1.25rem 1.5rem .75rem;
+}
+
+.summary-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+  border-top: 3px solid var(--blush);
+}
+.summary-card.confirmed { border-color: #6dbf8a; }
+.summary-card.pending   { border-color: #f0c060; }
+.summary-card.declined  { border-color: #e08080; }
+.summary-card.pax       { border-color: var(--rose); }
+
+.s-num {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--dark);
+  line-height: 1;
+  margin-bottom: .25rem;
+}
+.s-label {
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+}
+
+/* ── Side breakdown ───────────────────────────────────────── */
+.side-breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+  padding: 0 1.5rem .75rem;
+}
+
+.side-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--shadow);
+}
+
+.bride-card { border-left: 4px solid var(--rose); }
+.groom-card { border-left: 4px solid var(--gold); }
+
+.side-label {
+  font-size: .8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  margin-bottom: .5rem;
+}
+.side-stats {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: .85rem;
+  color: var(--dark);
+}
+
+/* ── Filters ──────────────────────────────────────────────── */
+.filters {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  padding: .5rem 1.5rem 1rem;
+}
+
+.filters select, .filters input {
+  max-width: 180px;
+  padding: .55rem .85rem;
+  font-size: .85rem;
+}
+
+/* ── Table ────────────────────────────────────────────────── */
+.table-wrap {
+  padding: 0 1.5rem 2rem;
+  overflow-x: auto;
+}
+
+.guest-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  font-size: .875rem;
+  min-width: 780px;
+}
+
+.guest-table thead {
+  background: #f0e8e2;
+}
+
+.guest-table th {
+  padding: .75rem 1rem;
+  text-align: left;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.guest-table td {
+  padding: .7rem 1rem;
+  border-bottom: 1px solid #f0ece8;
+  vertical-align: middle;
+}
+
+.guest-table tr:last-child td { border-bottom: none; }
+.guest-table tr:hover td { background: #fdf8f5; }
+
+/* Status badges */
+.badge {
+  display: inline-block;
+  padding: .2rem .6rem;
+  border-radius: 50px;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.badge-pending   { background: #fef3cd; color: #856404; }
+.badge-confirmed { background: #d1f0de; color: #1a7340; }
+.badge-declined  { background: #fde8e8; color: #9b2335; }
+
+/* Side chips */
+.chip {
+  display: inline-block;
+  padding: .18rem .55rem;
+  border-radius: 50px;
+  font-size: .72rem;
+  font-weight: 600;
+}
+.chip-bride { background: #fde8e8; color: var(--rose); }
+.chip-groom { background: #fef3e2; color: var(--gold); }
+
+/* Table number input */
+.table-input {
+  width: 60px;
+  padding: .3rem .5rem;
+  text-align: center;
+  font-size: .85rem;
+}
+
+/* Action buttons */
+.act-btn {
+  background: none;
+  border: 1px solid #e8ddd8;
+  border-radius: 6px;
+  padding: .25rem .6rem;
+  font-size: .75rem;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all .15s;
+}
+.act-btn:hover { border-color: var(--rose); color: var(--rose); }
+.act-btn.danger:hover { border-color: #c0392b; color: #c0392b; }
+
+.copy-link-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: .8rem;
+  color: var(--rose);
+  text-decoration: underline;
+  padding: 0;
+}
+
+/* ── Modal ────────────────────────────────────────────────── */
+#modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(58,46,40,.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+}
+
+.modal-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 2rem 1.75rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.2);
+}
+
+/* ── Upload drop zone ─────────────────────────────────────── */
+.drop-zone {
+  border: 2px dashed var(--blush);
+  border-radius: var(--radius);
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  background: var(--cream);
+  font-size: .9rem;
+  color: var(--muted);
+}
+.drop-zone:hover, .drop-zone.dragover {
+  border-color: var(--rose);
+  background: #fdf0ed;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .side-breakdown { grid-template-columns: 1fr; }
+  .admin-header   { flex-direction: column; align-items: flex-start; }
+}
