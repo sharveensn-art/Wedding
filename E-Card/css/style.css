@@ -46,7 +46,7 @@ h1, h2, h3 { font-family: var(--font-serif); font-weight: 400; }
   justify-content: center;
   text-align: center;
   padding: 2rem 1.5rem;
-  background: linear-gradient(160deg, #fdf0e8 0%, #f7e4d8 100%);
+  background: var(--scarlet);
   position: relative;
   overflow: hidden;
 }
