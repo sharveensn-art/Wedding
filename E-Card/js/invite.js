@@ -24,23 +24,30 @@ document.getElementById('rsvp-subtitle').textContent =
 document.getElementById('deadline-notice').textContent =
   `RSVP closes on ${deadline.toLocaleDateString('en-MY', { day:'numeric', month:'long', year:'numeric' })}`;
 
-// ── Read token from URL ───────────────────────────────────
-const token = new URLSearchParams(window.location.search).get('token');
+// ── Phone lookup ──────────────────────────────────────────
+async function lookupPhone() {
+  const raw = document.getElementById('phone-input').value.trim();
+  if (!raw) return;
 
-// ── Load guest ────────────────────────────────────────────
-async function loadGuest() {
-  if (!token) { showState('invalid'); return; }
+  // Normalise: strip spaces and dashes
+  const phone = raw.replace(/[\s\-]/g, '');
 
-  // Check if RSVP is closed
+  document.getElementById('err-phone').classList.add('hidden');
+  showState('loading');
+
   if (new Date() > deadline) { showState('closed'); return; }
 
   const { data, error } = await db
     .from('guests')
     .select('*')
-    .eq('token', token)
+    .eq('phone', phone)
     .single();
 
-  if (error || !data) { showState('invalid'); return; }
+  if (error || !data) {
+    showState('phone');
+    document.getElementById('err-phone').classList.remove('hidden');
+    return;
+  }
 
   guest = data;
 
@@ -176,7 +183,7 @@ document.getElementById('rsvp-form').addEventListener('submit', async (e) => {
 
 // ── Helpers ───────────────────────────────────────────────
 function showState(state) {
-  ['loading','invalid','done','closed','form','success'].forEach(s => {
+  ['loading','phone','done','closed','form','success'].forEach(s => {
     document.getElementById(`state-${s}`).classList.add('hidden');
   });
   document.getElementById(`state-${state}`).classList.remove('hidden');
@@ -189,4 +196,8 @@ function showSuccess(title, msg) {
 }
 
 // ── Boot ──────────────────────────────────────────────────
-loadGuest();
+if (new Date() > deadline) {
+  showState('closed');
+} else {
+  showState('phone');
+}

@@ -69,15 +69,22 @@
   <div class="rsvp-card">
 
     <!-- Loading state -->
-    <div id="state-loading" style="text-align:center; padding:2rem; color:var(--muted);">
-      Loading your invitation…
+    <div id="state-loading" class="hidden" style="text-align:center; padding:2rem; color:var(--muted);">
+      Looking up your invitation…
     </div>
 
-    <!-- Invalid / expired token -->
-    <div id="state-invalid" class="hidden" style="text-align:center; padding:2rem;">
-      <div style="font-size:2rem; margin-bottom:1rem;">🔗</div>
-      <h3 style="font-family:var(--font-serif); margin-bottom:.5rem;">Invalid Link</h3>
-      <p style="color:var(--muted); font-size:.9rem;">This invitation link is not valid. Please check the link you received.</p>
+    <!-- Phone lookup -->
+    <div id="state-phone" class="hidden" style="text-align:center; padding:1rem 0;">
+      <p style="font-size:.9rem; color:var(--muted); margin-bottom:1.5rem;">
+        Enter your phone number to access your invitation.
+      </p>
+      <div class="form-group" style="text-align:left;">
+        <label>Phone number</label>
+        <input type="tel" id="phone-input" placeholder="e.g. 0123456789"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();lookupPhone();}" />
+        <p class="error hidden" id="err-phone">Phone number not found. Please check and try again.</p>
+      </div>
+      <button class="btn btn-primary btn-submit" onclick="lookupPhone()">Find My Invitation</button>
     </div>
 
     <!-- Already responded -->

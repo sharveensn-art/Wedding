@@ -89,12 +89,7 @@ function renderTable(guests) {
   }
   noResults.classList.add('hidden');
 
-  // Build the base URL for invite links
-  const baseUrl = window.location.href.replace('admin.html', 'index.html');
-
-  tbody.innerHTML = guests.map(g => {
-    const inviteUrl = `${baseUrl}?token=${g.token}`;
-    return `
+  tbody.innerHTML = guests.map(g => `
     <tr data-id="${g.id}">
       <td><strong>${escHtml(g.name)}</strong></td>
       <td><span class="chip chip-${g.side}">${g.side}</span></td>
@@ -114,14 +109,14 @@ function renderTable(guests) {
       <td style="max-width:160px; font-size:.8rem; color:var(--muted);">
         ${g.dietary_notes ? escHtml(g.dietary_notes) : '—'}
       </td>
-      <td>
-        <button class="copy-link-btn" onclick="copyLink('${inviteUrl}')">Copy link</button>
+      <td style="white-space:nowrap;">
+        <span style="font-size:.85rem;">${escHtml(g.phone || '—')}</span>
+        ${g.phone ? `<button class="copy-link-btn" style="margin-left:.4rem;" onclick="copyMessage('${escHtml(g.name)}', '${escHtml(g.phone)}')">Copy msg</button>` : ''}
       </td>
       <td style="white-space:nowrap;">
         <button class="act-btn danger" onclick="deleteGuest('${g.id}', '${escHtml(g.name)}')">Delete</button>
       </td>
-    </tr>`;
-  }).join('');
+    </tr>`).join('');
 }
 
 // ── Save table number ─────────────────────────────────────
@@ -135,20 +130,36 @@ async function saveTableNumber(id, val) {
   }
 }
 
-// ── Copy invite link ──────────────────────────────────────
-function copyLink(url) {
-  navigator.clipboard.writeText(url).then(() => {
-    alert('Invite link copied!\n\n' + url);
+// ── Copy WhatsApp message ─────────────────────────────────
+function copyMessage(name, phone) {
+  const inviteUrl = window.location.href.replace('admin.html', 'index.html');
+  const deadlineStr = new Date(WEDDING.rsvpDeadline).toLocaleDateString('en-MY', { day:'numeric', month:'long', year:'numeric' });
+  const message = [
+    `Assalamualaikum ${name},`,
+    ``,
+    `You are cordially invited to the wedding of ${WEDDING.brideFullName} & ${WEDDING.groomFullName}.`,
+    ``,
+    `Please RSVP via the link below and enter your phone number (${phone}) when prompted:`,
+    inviteUrl,
+    ``,
+    `Kindly respond by ${deadlineStr}.`,
+    ``,
+    `We look forward to celebrating with you! 🎊`,
+  ].join('\n');
+
+  navigator.clipboard.writeText(message).then(() => {
+    alert('Message copied! Paste it into WhatsApp.');
   }).catch(() => {
-    prompt('Copy this link:', url);
+    prompt('Copy this message:', message);
   });
 }
 
 // ── Add guest modal ───────────────────────────────────────
 function openAddGuest() {
-  document.getElementById('new-name').value = '';
-  document.getElementById('new-side').value = 'bride';
-  document.getElementById('new-pax').value  = '2';
+  document.getElementById('new-name').value  = '';
+  document.getElementById('new-side').value  = 'bride';
+  document.getElementById('new-pax').value   = '2';
+  document.getElementById('new-phone').value = '';
   document.getElementById('modal-error').classList.add('hidden');
   document.getElementById('modal-overlay').classList.remove('hidden');
 }
@@ -160,9 +171,10 @@ function closeModal(event) {
 }
 
 async function addGuest() {
-  const name = document.getElementById('new-name').value.trim();
-  const side = document.getElementById('new-side').value;
-  const pax  = parseInt(document.getElementById('new-pax').value, 10);
+  const name  = document.getElementById('new-name').value.trim();
+  const side  = document.getElementById('new-side').value;
+  const pax   = parseInt(document.getElementById('new-pax').value, 10);
+  const phone = document.getElementById('new-phone').value.trim().replace(/[\s\-]/g, '') || null;
 
   if (!name) {
     document.getElementById('modal-error').textContent = 'Please enter a name.';
@@ -170,7 +182,7 @@ async function addGuest() {
     return;
   }
 
-  const { data, error } = await db.from('guests').insert([{ name, side, max_pax: pax }]).select().single();
+  const { data, error } = await db.from('guests').insert([{ name, side, max_pax: pax, phone }]).select().single();
   if (error) {
     document.getElementById('modal-error').textContent = 'Failed to add guest: ' + error.message;
     document.getElementById('modal-error').classList.remove('hidden');
@@ -204,12 +216,13 @@ async function exportCSV() {
   });
 
   const rows = [
-    ['Family Name', 'Side', 'Status', 'Pax Confirmed', 'Table', 'Attendee Names', 'Dietary Notes', 'Responded At']
+    ['Family Name', 'Phone', 'Side', 'Status', 'Pax Confirmed', 'Table', 'Attendee Names', 'Dietary Notes', 'Responded At']
   ];
 
   allGuests.forEach(g => {
     rows.push([
       g.name,
+      g.phone ?? '',
       g.side,
       g.rsvp_status,
       g.pax_count ?? '',
@@ -314,6 +327,7 @@ function validateAndPreview(raw) {
     const side    = r['side'].toLowerCase();
     const paxRaw  = r['max_pax'];
     const pax     = parseInt(paxRaw, 10);
+    const phone   = r['phone'] ? String(r['phone']).trim().replace(/[\s\-]/g, '') : null;
 
     const validSide = ['bride', 'groom'].includes(side);
     const validPax  = pax === 2 || pax === 4;
@@ -321,7 +335,7 @@ function validateAndPreview(raw) {
     const valid     = validName && validSide && validPax;
 
     if (!valid) warnCount++;
-    if (valid) parsedRows.push({ name, side, max_pax: pax });
+    if (valid) parsedRows.push({ name, side, max_pax: pax, phone: phone || null });
 
     const issues = [];
     if (!validName) issues.push('empty name');
@@ -381,10 +395,10 @@ async function importGuests() {
 
 function downloadTemplate() {
   const rows = [
-    ['name', 'side', 'max_pax'],
-    ['Ahmad & Family', 'groom', 4],
-    ['Priya Devi', 'bride', 2],
-    ['Tan Wei Ming', 'bride', 4],
+    ['name', 'side', 'max_pax', 'phone'],
+    ['Ahmad & Family', 'groom', 4, '0123456789'],
+    ['Priya Devi', 'bride', 2, '0198765432'],
+    ['Tan Wei Ming', 'bride', 4, '0112223333'],
   ];
   const ws = XLSX.utils.aoa_to_sheet(rows);
   const wb = XLSX.utils.book_new();
