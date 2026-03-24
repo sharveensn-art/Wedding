@@ -45,7 +45,10 @@ async function lookupPhone() {
 
   if (error || !data) {
     showState('phone');
-    document.getElementById('err-phone').classList.remove('hidden');
+    const errEl = document.getElementById('err-phone');
+    const waNum = String(WEDDING.contactWhatsApp).replace(/^\+/, '');
+    errEl.innerHTML = `Phone number not found. Please contact <a href="https://wa.me/${waNum}" target="_blank" rel="noopener"><strong>${WEDDING.contactName}</strong></a> for assistance.`;
+    errEl.classList.remove('hidden');
     return;
   }
 
@@ -199,5 +202,11 @@ function showSuccess(title, msg) {
 if (new Date() > deadline) {
   showState('closed');
 } else {
-  showState('phone');
+  const urlPhone = new URLSearchParams(window.location.search).get('phone');
+  if (urlPhone) {
+    document.getElementById('phone-input').value = urlPhone;
+    lookupPhone();
+  } else {
+    showState('phone');
+  }
 }

@@ -132,14 +132,15 @@ async function saveTableNumber(id, val) {
 
 // ── Copy WhatsApp message ─────────────────────────────────
 function copyMessage(name, phone) {
-  const inviteUrl = window.location.href.replace('admin.html', 'index.html');
+  const base = window.location.href.replace('admin.html', 'index.html');
+  const inviteUrl = `${base}?phone=${encodeURIComponent(phone)}`;
   const deadlineStr = new Date(WEDDING.rsvpDeadline).toLocaleDateString('en-MY', { day:'numeric', month:'long', year:'numeric' });
   const message = [
     `Assalamualaikum ${name},`,
     ``,
     `You are cordially invited to the wedding of ${WEDDING.brideFullName} & ${WEDDING.groomFullName}.`,
     ``,
-    `Please RSVP via the link below and enter your phone number (${phone}) when prompted:`,
+    `Please RSVP via your personal link below:`,
     inviteUrl,
     ``,
     `Kindly respond by ${deadlineStr}.`,
