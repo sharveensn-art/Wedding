@@ -7,5 +7,3 @@ Temple Layout/
 *.png
 *.pdf
 
-# E-Card: Supabase credentials (never commit these)
-E-Card/config.js
