@@ -52,13 +52,13 @@ h1, h2, h3 { font-family: var(--font-serif); font-weight: 400; }
 .hero::before { width: 340px; height: 340px; top: -80px; right: -80px; }
 .hero::after  { width: 240px; height: 240px; bottom: -60px; left: -60px; }
 
-.hero-bismillah {
+/* .hero-bismillah {
   font-family: var(--font-serif);
   font-size: 1.1rem;
   color: var(--gold);
   letter-spacing: .08em;
   margin-bottom: 1.5rem;
-}
+} */
 
 .hero-invite-label {
   font-size: .78rem;
