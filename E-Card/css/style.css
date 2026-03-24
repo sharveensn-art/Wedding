@@ -9,6 +9,15 @@
   --dark:    #3a2e28;
   --muted:   #7a6a62;
   --white:   #ffffff;
+  --crimson:     #A50C1C;
+  --scarlet:     #D21423;
+  --silver:      #C6BBB7;
+  --ivory:       #FAF7F2;
+  --cream:       #F2EBE0;
+  --gold:        #C8A96E;
+  --deep-green:  #4A5E4A;
+  --charcoal:    #2E2E2E;
+  --light-grey:  #E8E4DF;
   --radius:  12px;
   --shadow:  0 4px 24px rgba(58,46,40,.10);
   --font-serif: 'Cormorant Garamond', Georgia, serif;
@@ -18,7 +27,7 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background: var(--cream);
+  background: var(--scarlet);
   color: var(--dark);
   font-family: var(--font-sans);
   font-size: 16px;
